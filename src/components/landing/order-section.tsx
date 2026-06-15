@@ -162,7 +162,7 @@ export function OrderSection() {
                           key={product.id}
                           className="flex items-center gap-3 p-3 rounded-lg border hover:border-primary/30 transition-colors"
                         >
-                          <div className="h-14 w-14 shrink-0 rounded bg-muted overflow-hidden">
+                          <div className="h-12 w-12 shrink-0 rounded bg-muted overflow-hidden">
                             {product.images?.[0] ? (
                               <img
                                 src={product.images[0]}
@@ -171,52 +171,48 @@ export function OrderSection() {
                               />
                             ) : (
                               <div className="h-full w-full flex items-center justify-center">
-                                <ShoppingCart className="h-5 w-5 text-muted-foreground" />
+                                <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                               </div>
                             )}
                           </div>
 
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm truncate">{product.name}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Button
+                            <p className="text-xs text-muted-foreground">
+                              {formatPrice(price)}
+                              {product.discountPrice && (
+                                <span className="line-through ml-1">{formatPrice(product.price)}</span>
+                              )}
+                            </p>
+                            <div className="flex items-center gap-0.5 mt-1">
+                              <button
                                 type="button"
-                                variant="outline"
-                                size="icon"
-                                className="h-6 w-6"
                                 onClick={() => setQuantity(product.id, qty - 1)}
                                 disabled={qty === 0}
+                                className="h-5 w-5 rounded border border-input flex items-center justify-center hover:bg-muted disabled:opacity-30 transition-colors"
                               >
                                 <Minus className="h-2.5 w-2.5" />
-                              </Button>
-                              <Input
+                              </button>
+                              <input
                                 type="number"
                                 min={0}
                                 value={qty}
                                 onChange={(e) => setQuantity(product.id, parseInt(e.target.value) || 0)}
-                                className="h-6 w-11 text-center text-xs [&::-webkit-inner-spin-button]:opacity-100 px-0"
+                                className="h-5 w-9 text-center text-xs border border-input rounded bg-transparent [&::-webkit-inner-spin-button]:opacity-100 [&::-webkit-outer-spin-button]:opacity-100"
                               />
-                              <Button
+                              <button
                                 type="button"
-                                variant="outline"
-                                size="icon"
-                                className="h-6 w-6"
                                 onClick={() => setQuantity(product.id, qty + 1)}
+                                className="h-5 w-5 rounded border border-input flex items-center justify-center hover:bg-muted transition-colors"
                               >
                                 <Plus className="h-2.5 w-2.5" />
-                              </Button>
-                              <span className="text-xs text-primary font-semibold ml-1">
-                                {formatPrice(price)} each
-                              </span>
+                              </button>
                             </div>
                           </div>
 
-                          <div className="text-right shrink-0 w-20">
+                          <div className="text-right shrink-0 w-16">
                             <p className="text-sm font-semibold">
                               {formatPrice(price * qty)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {qty} × {formatPrice(price)}
                             </p>
                           </div>
                         </div>
