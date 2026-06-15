@@ -82,6 +82,7 @@ export const heroContentSchema = z.object({
   subtitle: z.string().optional(),
   ctaText: z.string().min(2, "CTA text is required"),
   image: z.string().optional(),
+  logo: z.string().optional(),
   badgeText: z.string().optional(),
   deliveryInfo: z.string().optional(),
 });

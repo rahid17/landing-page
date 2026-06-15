@@ -50,6 +50,7 @@ const defaultFormValues: LandingContentFormData = {
     subtitle: "",
     ctaText: "",
     image: "",
+    logo: "",
     badgeText: "",
     deliveryInfo: "",
   },
@@ -92,6 +93,7 @@ export default function CMSPage() {
           subtitle: content.hero?.subtitle ?? "",
           ctaText: content.hero?.ctaText ?? "",
           image: content.hero?.image ?? "",
+          logo: content.hero?.logo ?? "",
           badgeText: content.hero?.badgeText ?? "",
           deliveryInfo: content.hero?.deliveryInfo ?? "",
         },
@@ -294,6 +296,17 @@ export default function CMSPage() {
                   />
                   <p className="text-xs text-muted-foreground">
                     Leave empty to use product image instead
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hero-logo">Logo Image URL</Label>
+                  <Input
+                    id="hero-logo"
+                    placeholder="https://example.com/logo.png"
+                    {...form.register("hero.logo")}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Shows at the top-left corner, responsive on all devices
                   </p>
                 </div>
                 <div className="space-y-2">

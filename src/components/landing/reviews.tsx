@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useReviews } from "@/hooks/use-reviews";
 import { useLandingContent } from "@/hooks/use-landing-content";
-import { Star, Quote } from "lucide-react";
+import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 
 const fallbackReviews = [
   {
@@ -29,6 +30,9 @@ const fallbackReviews = [
   },
 ];
 
+const AUTO_SLIDE_INTERVAL = 5000;
+const DRAG_THRESHOLD = 50;
+
 function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5">
@@ -46,21 +50,26 @@ function StarRating({ rating }: { rating: number }) {
 
 function ReviewsSkeleton() {
   return (
-    <div className="grid md:grid-cols-3 gap-6">
+    <div className="flex overflow-hidden">
       {Array.from({ length: 3 }).map((_, i) => (
-        <Card key={i}>
-          <CardContent className="p-6 space-y-4">
-            <Skeleton className="w-10 h-10 rounded-full" />
-            <div className="flex gap-1">
-              {Array.from({ length: 5 }).map((_, j) => (
-                <Skeleton key={j} className="w-4 h-4 rounded-full" />
-              ))}
-            </div>
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-20" />
-          </CardContent>
-        </Card>
+        <div
+          key={i}
+          className="min-w-[300px] sm:min-w-[350px] md:w-1/2 lg:w-1/3 flex-shrink-0 px-2"
+        >
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <Skeleton className="w-10 h-10 rounded-full" />
+              <div className="flex gap-1">
+                {Array.from({ length: 5 }).map((_, j) => (
+                  <Skeleton key={j} className="w-4 h-4 rounded-full" />
+                ))}
+              </div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-20" />
+            </CardContent>
+          </Card>
+        </div>
       ))}
     </div>
   );
@@ -69,29 +78,171 @@ function ReviewsSkeleton() {
 export function ReviewsSection() {
   const { reviews, loading } = useReviews();
   const { content } = useLandingContent();
-  const sectionRef = useRef<HTMLElement>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [cardsPerView, setCardsPerView] = useState(() => {
+    if (typeof window === "undefined") return 1;
+    const width = window.innerWidth;
+    if (width >= 1024) return 3;
+    if (width >= 768) return 2;
+    return 1;
+  });
+  const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragCurrentX = useRef(0);
+  const isPaused = useRef(false);
+  const autoSlideTimer = useRef<NodeJS.Timeout | null>(null);
 
   const displayReviews = reviews.length > 0 ? reviews.slice(0, 6) : fallbackReviews;
+  const maxSlides = Math.max(0, displayReviews.length - cardsPerView);
+  const slidePercentage = 100 / cardsPerView;
+  const showArrows = displayReviews.length > cardsPerView;
+  const effectiveSlide = Math.max(0, Math.min(currentSlide, maxSlides));
+  const translateX = -(effectiveSlide * slidePercentage);
+
+  const updateCardsPerView = useCallback(() => {
+    const width = window.innerWidth;
+    if (width >= 1024) {
+      setCardsPerView(3);
+    } else if (width >= 768) {
+      setCardsPerView(2);
+    } else {
+      setCardsPerView(1);
+    }
+  }, []);
 
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.querySelectorAll(".review-card").forEach((card, i) => {
-            setTimeout(() => {
-              card.classList.add("opacity-100", "translate-y-0");
-              card.classList.remove("opacity-0", "translate-y-4");
-            }, i * 150);
-          });
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [displayReviews]);
+    window.addEventListener("resize", updateCardsPerView);
+    return () => window.removeEventListener("resize", updateCardsPerView);
+  }, [updateCardsPerView]);
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      setCurrentSlide(Math.max(0, Math.min(index, maxSlides)));
+    },
+    [maxSlides]
+  );
+
+  const goNext = useCallback(() => {
+    if (effectiveSlide >= maxSlides) {
+      setIsTransitionEnabled(false);
+      setCurrentSlide(0);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsTransitionEnabled(true);
+        });
+      });
+    } else {
+      setCurrentSlide((prev) => prev + 1);
+    }
+  }, [effectiveSlide, maxSlides]);
+
+  const goPrev = useCallback(() => {
+    if (effectiveSlide <= 0) {
+      setIsTransitionEnabled(false);
+      setCurrentSlide(maxSlides);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsTransitionEnabled(true);
+        });
+      });
+    } else {
+      setCurrentSlide((prev) => prev - 1);
+    }
+  }, [effectiveSlide, maxSlides]);
+
+  useEffect(() => {
+    if (displayReviews.length <= cardsPerView) {
+      if (autoSlideTimer.current) {
+        clearInterval(autoSlideTimer.current);
+        autoSlideTimer.current = null;
+      }
+      return;
+    }
+
+    if (autoSlideTimer.current) {
+      clearInterval(autoSlideTimer.current);
+    }
+
+    autoSlideTimer.current = setInterval(() => {
+      if (!isPaused.current && !isDragging.current) {
+        goNext();
+      }
+    }, AUTO_SLIDE_INTERVAL);
+
+    return () => {
+      if (autoSlideTimer.current) {
+        clearInterval(autoSlideTimer.current);
+        autoSlideTimer.current = null;
+      }
+    };
+  }, [goNext, displayReviews.length, cardsPerView]);
+
+  const finishDrag = useCallback(() => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    setIsTransitionEnabled(true);
+
+    const delta = dragCurrentX.current - dragStartX.current;
+
+    if (Math.abs(delta) > DRAG_THRESHOLD) {
+      if (delta < -DRAG_THRESHOLD) {
+        goNext();
+      } else {
+        goPrev();
+      }
+    } else {
+      if (trackRef.current) {
+        trackRef.current.style.transform = `translateX(${translateX}%)`;
+      }
+    }
+  }, [goNext, goPrev, translateX]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isDragging.current = true;
+    dragStartX.current = e.clientX;
+    dragCurrentX.current = e.clientX;
+    setIsTransitionEnabled(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    dragCurrentX.current = e.clientX;
+    const delta = dragCurrentX.current - dragStartX.current;
+    if (trackRef.current) {
+      const containerWidth = containerRef.current?.offsetWidth || 1;
+      const deltaPercent = (delta / containerWidth) * 100;
+      trackRef.current.style.transform = `translateX(${translateX + deltaPercent}%)`;
+    }
+  };
+
+  const handleMouseUp = () => {
+    finishDrag();
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    isDragging.current = true;
+    dragStartX.current = e.touches[0].clientX;
+    dragCurrentX.current = e.touches[0].clientX;
+    setIsTransitionEnabled(false);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging.current) return;
+    dragCurrentX.current = e.touches[0].clientX;
+    const delta = dragCurrentX.current - dragStartX.current;
+    if (trackRef.current) {
+      const containerWidth = containerRef.current?.offsetWidth || 1;
+      const deltaPercent = (delta / containerWidth) * 100;
+      trackRef.current.style.transform = `translateX(${translateX + deltaPercent}%)`;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    finishDrag();
+  };
 
   const getInitials = (name: string) =>
     name
@@ -102,7 +253,7 @@ export function ReviewsSection() {
       .slice(0, 2);
 
   return (
-    <section ref={sectionRef} id="reviews" className="py-16 md:py-24 bg-background">
+    <section id="reviews" className="py-16 md:py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -117,41 +268,111 @@ export function ReviewsSection() {
         {loading ? (
           <ReviewsSkeleton />
         ) : (
-          <div className="grid md:grid-cols-3 gap-6">
-            {displayReviews.map((review, index) => (
-              <Card
-                key={review.customerName + index}
-                className="review-card border-border/60 hover:border-primary/20 hover:shadow-md transition-all duration-300 opacity-0 translate-y-4"
+          <div className="relative">
+            <div
+              ref={containerRef}
+              className="overflow-hidden"
+              onMouseEnter={() => {
+                isPaused.current = true;
+              }}
+              onMouseLeave={() => {
+                isPaused.current = false;
+              }}
+            >
+              <div
+                ref={trackRef}
+                className="flex cursor-grab active:cursor-grabbing"
+                style={{
+                  transform: `translateX(${translateX}%)`,
+                  transition: isTransitionEnabled ? "transform 0.5s ease" : "none",
+                }}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
               >
-                <CardContent className="p-6">
-                  <Quote className="w-8 h-8 text-primary/20 mb-3" />
-                  <StarRating rating={review.rating} />
-                  <p className="mt-3 text-muted-foreground leading-relaxed">
-                    {review.text}
-                  </p>
-                  <div className="mt-4 flex items-center gap-3 border-t border-border pt-4">
-                    <Avatar className="w-9 h-9">
-                      {review.photos && review.photos.length > 0 && (
-                        <AvatarImage src={review.photos[0]} alt={review.customerName} />
-                      )}
-                      <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                        {getInitials(review.customerName)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <span className="font-semibold text-foreground text-sm">
-                        {review.customerName}
-                      </span>
-                      {review.photos && review.photos.length > 0 && (
-                        <span className="text-xs text-muted-foreground ml-2">
-                          +{review.photos.length} photo{review.photos.length > 1 ? "s" : ""}
-                        </span>
-                      )}
-                    </div>
+                {displayReviews.map((review, index) => (
+                  <div
+                    key={review.customerName + index}
+                    className="min-w-[300px] sm:min-w-[350px] md:w-1/2 lg:w-1/3 flex-shrink-0 px-2 select-none"
+                  >
+                    <Card className="border-border/60 hover:border-primary/20 hover:shadow-md transition-all duration-300 h-full">
+                      <CardContent className="p-6">
+                        <Quote className="w-8 h-8 text-primary/20 mb-3" />
+                        <StarRating rating={review.rating} />
+                        <p className="mt-3 text-muted-foreground leading-relaxed">
+                          {review.text}
+                        </p>
+                        <div className="mt-4 flex items-center gap-3 border-t border-border pt-4">
+                          <Avatar className="w-9 h-9">
+                            {review.photos && review.photos.length > 0 && (
+                              <AvatarImage src={review.photos[0]} alt={review.customerName} />
+                            )}
+                            <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                              {getInitials(review.customerName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <span className="font-semibold text-foreground text-sm">
+                              {review.customerName}
+                            </span>
+                            {review.photos && review.photos.length > 0 && (
+                              <span className="text-xs text-muted-foreground ml-2">
+                                +{review.photos.length} photo
+                                {review.photos.length > 1 ? "s" : ""}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                ))}
+              </div>
+            </div>
+
+            {showArrows && (
+              <>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 rounded-full shadow-md bg-background border-border hover:bg-accent hidden md:inline-flex"
+                  onClick={goPrev}
+                  aria-label="Previous review"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 rounded-full shadow-md bg-background border-border hover:bg-accent hidden md:inline-flex"
+                  onClick={goNext}
+                  aria-label="Next review"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </Button>
+              </>
+            )}
+
+            {displayReviews.length > cardsPerView && (
+              <div className="flex justify-center gap-2 mt-6">
+                {Array.from({ length: maxSlides + 1 }).map((_, i) => (
+                  <button
+                    key={i}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      i === effectiveSlide
+                        ? "bg-primary w-6"
+                        : "w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                    }`}
+                    onClick={() => goToSlide(i)}
+                    aria-label={`Go to slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

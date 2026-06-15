@@ -103,6 +103,7 @@ export interface HeroContent {
   subtitle?: string;
   ctaText: string;
   image?: string;
+  logo?: string;
   badgeText?: string;
   deliveryInfo?: string;
 }
