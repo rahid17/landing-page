@@ -160,8 +160,21 @@ export function OrderSection() {
                       return (
                         <div
                           key={product.id}
-                          className="flex items-center gap-3 p-3 rounded-lg border hover:border-primary/30 transition-colors"
+                          className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary/30 transition-colors"
                         >
+                          <input
+                            type="checkbox"
+                            checked={qty > 0}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setQuantity(product.id, qty > 0 ? qty : 1);
+                              } else {
+                                setQuantity(product.id, 0);
+                              }
+                            }}
+                            className="mt-1 h-4 w-4 rounded border-input accent-primary shrink-0"
+                          />
+
                           <div className="h-12 w-12 shrink-0 rounded bg-muted overflow-hidden">
                             {product.images?.[0] ? (
                               <img
@@ -188,7 +201,7 @@ export function OrderSection() {
                               <button
                                 type="button"
                                 onClick={() => setQuantity(product.id, qty - 1)}
-                                disabled={qty === 0}
+                                disabled={qty <= 1}
                                 className="h-5 w-5 rounded border border-input flex items-center justify-center hover:bg-muted disabled:opacity-30 transition-colors"
                               >
                                 <Minus className="h-2.5 w-2.5" />
