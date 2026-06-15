@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useLandingContent } from "@/hooks/use-landing-content";
+import { useProducts } from "@/hooks/use-products";
 import { updateLandingContent } from "@/services/landing-content";
+import { updateProduct } from "@/services/products";
+import { uploadImage } from "@/services/storage";
 import { landingContentSchema, type LandingContentFormData } from "@/validations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +45,7 @@ import {
   Plus,
   Trash2,
   X,
+  Upload,
 } from "lucide-react";
 
 const defaultFormValues: LandingContentFormData = {
@@ -78,7 +82,16 @@ const defaultFormValues: LandingContentFormData = {
 
 export default function CMSPage() {
   const { content, loading, refresh } = useLandingContent();
+  const { products } = useProducts();
   const [saving, setSaving] = useState(false);
+  const [uploadingHero, setUploadingHero] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [priceValue, setPriceValue] = useState<number>(0);
+  const [savingPrice, setSavingPrice] = useState(false);
+  const heroInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const product = products?.[0];
 
   const form = useForm<LandingContentFormData>({
     resolver: zodResolver(landingContentSchema),
@@ -141,6 +154,55 @@ export default function CMSPage() {
       });
     }
   }, [content, form]);
+
+  useEffect(() => {
+    if (product) {
+      setPriceValue(product.discountPrice ?? product.price);
+    }
+  }, [product]);
+
+  const handleHeroUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingHero(true);
+    try {
+      const url = await uploadImage(file, `hero/hero-${Date.now()}`);
+      form.setValue("hero.image", url, { shouldValidate: true });
+      toast.success("Hero image uploaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploadingHero(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const url = await uploadImage(file, `hero/logo-${Date.now()}`);
+      form.setValue("hero.logo", url, { shouldValidate: true });
+      toast.success("Logo uploaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleSavePrice = async () => {
+    if (!product) return;
+    setSavingPrice(true);
+    try {
+      await updateProduct(product.id, { price: priceValue, discountPrice: undefined });
+      toast.success("Product price updated");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update price");
+    } finally {
+      setSavingPrice(false);
+    }
+  };
 
   const onSubmit = async (data: LandingContentFormData) => {
     setSaving(true);
@@ -288,25 +350,129 @@ export default function CMSPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="hero-image">Hero Image URL</Label>
+                  <Label>Hero Image</Label>
+                  {form.watch("hero.image") ? (
+                    <div className="relative group">
+                      <img
+                        src={form.watch("hero.image")}
+                        alt="Hero"
+                        className="w-full h-40 object-cover rounded-lg border"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => form.setValue("hero.image", "")}
+                        className="absolute top-2 right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-full h-40 rounded-lg bg-muted flex items-center justify-center border">
+                      <Image className="h-8 w-8 text-muted-foreground/40" />
+                    </div>
+                  )}
+                  <input
+                    ref={heroInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleHeroUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => heroInputRef.current?.click()}
+                    disabled={uploadingHero}
+                    className="w-full"
+                  >
+                    {uploadingHero ? (
+                      <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Uploading...</>
+                    ) : (
+                      <><Upload className="h-4 w-4 mr-2" /> Upload Hero Image</>
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">Or enter URL manually:</p>
                   <Input
                     id="hero-image"
                     placeholder="https://example.com/hero-image.jpg"
                     {...form.register("hero.image")}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Leave empty to use product image instead
-                  </p>
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="hero-logo">Logo Image URL</Label>
+                  <Label>Logo Image</Label>
+                  {form.watch("hero.logo") ? (
+                    <div className="relative group inline-block">
+                      <img
+                        src={form.watch("hero.logo")}
+                        alt="Logo"
+                        className="h-12 object-contain rounded border"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => form.setValue("hero.logo", "")}
+                        className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="h-12 w-32 rounded border bg-muted flex items-center justify-center">
+                      <Image className="h-4 w-4 text-muted-foreground/40" />
+                    </div>
+                  )}
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => logoInputRef.current?.click()}
+                    disabled={uploadingLogo}
+                    className="w-full"
+                  >
+                    {uploadingLogo ? (
+                      <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Uploading...</>
+                    ) : (
+                      <><Upload className="h-4 w-4 mr-2" /> Upload Logo</>
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">Or enter URL manually:</p>
                   <Input
                     id="hero-logo"
                     placeholder="https://example.com/logo.png"
                     {...form.register("hero.logo")}
                   />
+                </div>
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <Label>Product Price</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={priceValue || ""}
+                      onChange={(e) => setPriceValue(parseFloat(e.target.value) || 0)}
+                      placeholder="250"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleSavePrice}
+                      disabled={savingPrice}
+                    >
+                      {savingPrice ? <Loader2 className="h-4 w-4 animate-spin" /> : "Update"}
+                    </Button>
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Shows at the top-left corner, responsive on all devices
+                    Updates the product price shown on the landing page
                   </p>
                 </div>
                 <div className="space-y-2">
