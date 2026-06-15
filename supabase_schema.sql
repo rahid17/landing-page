@@ -24,11 +24,8 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_number TEXT NOT NULL,
-  product_id TEXT NOT NULL,
-  product_name TEXT NOT NULL,
-  quantity INTEGER NOT NULL DEFAULT 1,
-  price NUMERIC NOT NULL,
-  subtotal NUMERIC NOT NULL,
+  items JSONB NOT NULL DEFAULT '[]',
+  subtotal NUMERIC NOT NULL DEFAULT 0,
   delivery_charge NUMERIC NOT NULL DEFAULT 0,
   total NUMERIC NOT NULL,
   customer_name TEXT NOT NULL,
@@ -221,6 +218,10 @@ DROP POLICY IF EXISTS "Admin can insert own record" ON admins;
 CREATE POLICY "Admin can insert own record" ON admins FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- Add code column to existing products table (safe to run multiple times)
+ALTER TABLE products ADD COLUMN IF NOT EXISTS code TEXT NOT NULL DEFAULT '';
+
+-- Add items column to existing orders table
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS items JSONB NOT NULL DEFAULT '[]';
 ALTER TABLE products ADD COLUMN IF NOT EXISTS code TEXT NOT NULL DEFAULT '';
 
 -- Add photos column to existing reviews table (safe to run multiple times)

@@ -6,8 +6,17 @@ export const loginSchema = z.object({
 });
 
 export const orderFormSchema = z.object({
-  productId: z.string().min(1, "Product is required"),
-  quantity: z.number().min(1, "Minimum quantity is 1").max(100, "Maximum quantity is 100"),
+  items: z
+    .array(
+      z.object({
+        productId: z.string(),
+        productName: z.string(),
+        productImage: z.string(),
+        quantity: z.number().min(0),
+        price: z.number(),
+      })
+    )
+    .refine((items) => items.some((i) => i.quantity > 0), "Select at least one product"),
   customerName: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().regex(/^01[3-9]\d{8}$/, "Invalid Bangladesh phone number"),
   address: z.string().min(10, "Address must be at least 10 characters"),

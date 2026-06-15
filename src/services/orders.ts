@@ -1,14 +1,11 @@
 import { supabase } from "@/lib/supabase";
-import type { Order, OrderStatus, DashboardStats } from "@/types";
+import type { Order, OrderItem, OrderStatus, DashboardStats } from "@/types";
 
 function toOrder(row: Record<string, unknown>): Order {
   return {
     id: row.id as string,
     orderNumber: row.order_number as string,
-    productId: row.product_id as string,
-    productName: row.product_name as string,
-    quantity: row.quantity as number,
-    price: row.price as number,
+    items: (row.items as OrderItem[]) ?? [],
     subtotal: row.subtotal as number,
     deliveryCharge: row.delivery_charge as number,
     total: row.total as number,
@@ -23,27 +20,6 @@ function toOrder(row: Record<string, unknown>): Order {
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
-}
-
-function toSnakeOrder(data: Record<string, unknown>): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-  if (data.orderNumber !== undefined) result.order_number = data.orderNumber;
-  if (data.productId !== undefined) result.product_id = data.productId;
-  if (data.productName !== undefined) result.product_name = data.productName;
-  if (data.quantity !== undefined) result.quantity = data.quantity;
-  if (data.price !== undefined) result.price = data.price;
-  if (data.subtotal !== undefined) result.subtotal = data.subtotal;
-  if (data.deliveryCharge !== undefined) result.delivery_charge = data.deliveryCharge;
-  if (data.total !== undefined) result.total = data.total;
-  if (data.customerName !== undefined) result.customer_name = data.customerName;
-  if (data.phone !== undefined) result.phone = data.phone;
-  if (data.address !== undefined) result.address = data.address;
-  if (data.districtId !== undefined) result.district_id = data.districtId;
-  if (data.districtName !== undefined) result.district_name = data.districtName;
-  if (data.paymentMethod !== undefined) result.payment_method = data.paymentMethod;
-  if (data.transactionId !== undefined) result.transaction_id = data.transactionId;
-  if (data.status !== undefined) result.status = data.status;
-  return result;
 }
 
 export async function getOrders(): Promise<Order[]> {
@@ -68,9 +44,7 @@ export async function getOrder(id: string): Promise<Order | null> {
   return toOrder(data);
 }
 
-export async function getOrdersByStatus(
-  status: OrderStatus
-): Promise<Order[]> {
+export async function getOrdersByStatus(status: OrderStatus): Promise<Order[]> {
   const { data, error } = await supabase
     .from("orders")
     .select("*")
@@ -81,10 +55,7 @@ export async function getOrdersByStatus(
 }
 
 export async function createOrder(
-  data: Omit<
-    Order,
-    "id" | "orderNumber" | "status" | "createdAt" | "updatedAt"
-  >
+  data: Omit<Order, "id" | "orderNumber" | "status" | "createdAt" | "updatedAt">
 ): Promise<Order> {
   const orderNumber = `KT-${Date.now()}-${Math.floor(Math.random() * 10000)
     .toString()
@@ -92,8 +63,18 @@ export async function createOrder(
   const { data: inserted, error } = await supabase
     .from("orders")
     .insert({
-      ...toSnakeOrder(data as unknown as Record<string, unknown>),
       order_number: orderNumber,
+      items: data.items,
+      subtotal: data.subtotal,
+      delivery_charge: data.deliveryCharge,
+      total: data.total,
+      customer_name: data.customerName,
+      phone: data.phone,
+      address: data.address,
+      district_id: data.districtId,
+      district_name: data.districtName,
+      payment_method: data.paymentMethod,
+      transaction_id: data.transactionId ?? null,
       status: "pending",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -116,37 +97,23 @@ export async function updateOrderStatus(
 }
 
 export async function deleteOrder(id: string): Promise<void> {
-  const { error } = await supabase
-    .from("orders")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("orders").delete().eq("id", id);
   if (error) throw error;
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const { data, error } = await supabase
-    .from("orders")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-
-  const orders = (data ?? []).map(toOrder);
-
+  const orders = await getOrders();
+  const totalOrders = orders.length;
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
-  const confirmedOrders = orders.filter(
-    (o) => o.status === "confirmed"
-  ).length;
-  const deliveredOrders = orders.filter(
-    (o) => o.status === "delivered"
-  ).length;
+  const confirmedOrders = orders.filter((o) => o.status === "confirmed").length;
+  const deliveredOrders = orders.filter((o) => o.status === "delivered").length;
   const totalRevenue = orders
     .filter((o) => o.status === "delivered")
     .reduce((sum, o) => sum + o.total, 0);
-
   const recentOrders = orders.slice(0, 10);
 
   return {
-    totalOrders: orders.length,
+    totalOrders,
     pendingOrders,
     confirmedOrders,
     deliveredOrders,

@@ -101,13 +101,20 @@ export default function SuccessContent() {
             <span className="text-sm text-muted-foreground">Order Number</span>
             <span className="font-mono font-bold text-primary">{order.orderNumber}</span>
           </div>
+
+          {order.items.map((item) => (
+            <div key={item.productId} className="flex justify-between items-center">
+              <span className="text-sm">
+                {item.productName}{" "}
+                <span className="text-muted-foreground">×{item.quantity}</span>
+              </span>
+              <span className="font-medium">{formatPrice(item.price * item.quantity)}</span>
+            </div>
+          ))}
+
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Product</span>
-            <span className="font-medium">{order.productName}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Quantity</span>
-            <span className="font-medium">{order.quantity}</span>
+            <span className="text-sm text-muted-foreground">Subtotal</span>
+            <span className="font-medium">{formatPrice(order.subtotal)}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Delivery Charge</span>

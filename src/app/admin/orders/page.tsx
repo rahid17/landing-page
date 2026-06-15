@@ -123,6 +123,13 @@ export default function OrdersPage() {
     }
   };
 
+  const productsLabel = (order: Order) => {
+    const count = order.items.length;
+    const first = order.items[0]?.productName ?? "";
+    if (count === 1) return first;
+    return `${first} +${count - 1} more`;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -164,9 +171,7 @@ export default function OrdersPage() {
                   <TableHead>Order #</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>District</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Qty</TableHead>
+                  <TableHead>Products</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Payment</TableHead>
                   <TableHead>Status</TableHead>
@@ -178,7 +183,7 @@ export default function OrdersPage() {
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}>
-                      {Array.from({ length: 11 }).map((_, j) => (
+                      {Array.from({ length: 9 }).map((_, j) => (
                         <TableCell key={j}>
                           <Skeleton className="h-4 w-16" />
                         </TableCell>
@@ -187,7 +192,7 @@ export default function OrdersPage() {
                   ))
                 ) : !filteredOrders.length ? (
                   <TableRow>
-                    <TableCell colSpan={11} className="text-center py-12 text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
                       No orders found
                     </TableCell>
                   </TableRow>
@@ -203,9 +208,14 @@ export default function OrdersPage() {
                       </TableCell>
                       <TableCell>{order.customerName}</TableCell>
                       <TableCell>{order.phone}</TableCell>
-                      <TableCell>{order.districtName}</TableCell>
-                      <TableCell>{order.productName}</TableCell>
-                      <TableCell>{order.quantity}</TableCell>
+                      <TableCell>
+                        <span className="text-sm">
+                          {order.items.length} item{order.items.length !== 1 ? "s" : ""}
+                        </span>
+                        <p className="text-xs text-muted-foreground truncate max-w-[180px]">
+                          {order.items[0]?.productName}
+                        </p>
+                      </TableCell>
                       <TableCell>{formatPrice(order.total)}</TableCell>
                       <TableCell className="uppercase text-xs">
                         {order.paymentMethod}
@@ -266,83 +276,128 @@ export default function OrdersPage() {
             </SheetDescription>
           </SheetHeader>
           {selectedOrder && (
-            <div className="mt-6 space-y-4">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Customer</p>
-                  <p className="font-medium">{selectedOrder.customerName}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Phone</p>
-                  <p className="font-medium">{selectedOrder.phone}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Address</p>
-                  <p className="font-medium">{selectedOrder.address}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">District</p>
-                  <p className="font-medium">{selectedOrder.districtName}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Product</p>
-                  <p className="font-medium">{selectedOrder.productName}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Quantity</p>
-                  <p className="font-medium">{selectedOrder.quantity}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Price</p>
-                  <p className="font-medium">
-                    {formatPrice(selectedOrder.price)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Subtotal</p>
-                  <p className="font-medium">
-                    {formatPrice(selectedOrder.subtotal)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Delivery Charge</p>
-                  <p className="font-medium">
-                    {formatPrice(selectedOrder.deliveryCharge)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Total</p>
-                  <p className="font-bold text-primary">
-                    {formatPrice(selectedOrder.total)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Payment Method</p>
-                  <p className="font-medium uppercase">
-                    {selectedOrder.paymentMethod}
-                  </p>
-                </div>
-                {selectedOrder.transactionId && (
+            <div className="mt-6 space-y-6">
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold">Customer</h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <p className="text-muted-foreground">Transaction ID</p>
-                    <p className="font-medium text-xs">
-                      {selectedOrder.transactionId}
+                    <p className="text-muted-foreground">Name</p>
+                    <p className="font-medium">{selectedOrder.customerName}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Phone</p>
+                    <p className="font-medium">{selectedOrder.phone}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground">Address</p>
+                    <p className="font-medium">
+                      {selectedOrder.address}
+                      {selectedOrder.districtName ? `, ${selectedOrder.districtName}` : ""}
                     </p>
                   </div>
-                )}
-                <div>
-                  <p className="text-muted-foreground">Date</p>
-                  <p className="font-medium">
-                    {format(
-                      new Date(selectedOrder.createdAt),
-                      "dd MMM yyyy hh:mm a"
-                    )}
-                  </p>
                 </div>
               </div>
+
               <Separator />
+
               <div className="space-y-2">
-                <p className="text-sm font-medium">Update Status</p>
+                <h4 className="text-sm font-semibold">
+                  Items ({selectedOrder.items.length})
+                </h4>
+                <div className="space-y-3">
+                  {selectedOrder.items.map((item, idx) => (
+                    <div
+                      key={`${item.productId}-${idx}`}
+                      className="flex gap-3 items-start"
+                    >
+                      {item.productImage ? (
+                        <img
+                          src={item.productImage}
+                          alt={item.productName}
+                          className="h-12 w-12 rounded-md object-cover border"
+                        />
+                      ) : (
+                        <div className="h-12 w-12 rounded-md bg-muted flex items-center justify-center text-muted-foreground text-xs">
+                          No img
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {item.productName}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.quantity} x {formatPrice(item.price)}
+                        </p>
+                      </div>
+                      <p className="text-sm font-medium whitespace-nowrap">
+                        {formatPrice(item.quantity * item.price)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold">Order Summary</h4>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>{formatPrice(selectedOrder.subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Delivery Charge</span>
+                    <span>{formatPrice(selectedOrder.deliveryCharge)}</span>
+                  </div>
+                  <Separator className="my-1" />
+                  <div className="flex justify-between font-bold">
+                    <span>Total</span>
+                    <span className="text-primary">
+                      {formatPrice(selectedOrder.total)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold">Payment</h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Method</p>
+                    <p className="font-medium uppercase">
+                      {selectedOrder.paymentMethod}
+                    </p>
+                  </div>
+                  {selectedOrder.transactionId && (
+                    <div>
+                      <p className="text-muted-foreground">Transaction ID</p>
+                      <p className="font-medium text-xs break-all">
+                        {selectedOrder.transactionId}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold">Date</h4>
+                <p className="text-sm text-muted-foreground">
+                  {format(
+                    new Date(selectedOrder.createdAt),
+                    "dd MMM yyyy, hh:mm a"
+                  )}
+                </p>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <p className="text-sm font-semibold">Update Status</p>
                 <Select
                   value={selectedOrder.status}
                   onValueChange={(v) =>
@@ -362,6 +417,7 @@ export default function OrdersPage() {
                   </SelectContent>
                 </Select>
               </div>
+
               <Button
                 variant="destructive"
                 className="w-full"
