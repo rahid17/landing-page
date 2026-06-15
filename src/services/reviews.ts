@@ -5,7 +5,7 @@ function toReview(row: Record<string, unknown>): Review {
   return {
     id: row.id as string,
     customerName: row.customer_name as string,
-    photoURL: row.photoURL as string | undefined,
+    photoURL: (row.photo_url || row.photoURL) as string | undefined,
     text: row.text as string,
     rating: row.rating as number,
     createdAt: row.created_at as string,
@@ -28,7 +28,7 @@ export async function createReview(
     .from("reviews")
     .insert({
       customer_name: data.customerName,
-      photoURL: data.photoURL ?? null,
+      photo_url: data.photoURL ?? null,
       text: data.text,
       rating: data.rating,
       created_at: new Date().toISOString(),
@@ -45,7 +45,7 @@ export async function updateReview(
 ): Promise<void> {
   const updates: Record<string, unknown> = {};
   if (data.customerName !== undefined) updates.customer_name = data.customerName;
-  if (data.photoURL !== undefined) updates.photoURL = data.photoURL;
+  if (data.photoURL !== undefined) updates.photo_url = data.photoURL;
   if (data.text !== undefined) updates.text = data.text;
   if (data.rating !== undefined) updates.rating = data.rating;
 

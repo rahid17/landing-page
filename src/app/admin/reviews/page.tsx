@@ -42,10 +42,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { Plus, Pencil, Trash2, Star, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, Loader2, AlertCircle } from "lucide-react";
 
 export default function ReviewsPage() {
-  const { reviews, loading, refresh } = useReviews();
+  const { reviews, loading, error, refresh } = useReviews();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
@@ -92,8 +92,9 @@ export default function ReviewsPage() {
       }
       setDialogOpen(false);
       refresh();
-    } catch {
-      toast.error("Something went wrong");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -107,8 +108,9 @@ export default function ReviewsPage() {
       toast.success("Review deleted");
       setDeleteOpen(false);
       refresh();
-    } catch {
-      toast.error("Failed to delete");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to delete";
+      toast.error(message);
     } finally {
       setDeleting(false);
       setDeletingId(null);
@@ -171,6 +173,17 @@ export default function ReviewsPage() {
                       <TableCell><Skeleton className="h-8 w-20" /></TableCell>
                     </TableRow>
                   ))
+                ) : error ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12">
+                      <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
+                      <p className="text-destructive font-medium">Failed to load reviews</p>
+                      <p className="text-sm text-muted-foreground mt-1">{error}</p>
+                      <Button variant="outline" size="sm" className="mt-3" onClick={refresh}>
+                        Retry
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ) : !reviews.length ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
