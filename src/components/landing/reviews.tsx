@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useReviews } from "@/hooks/use-reviews";
+import { useLandingContent } from "@/hooks/use-landing-content";
 import { Star, Quote } from "lucide-react";
 
 const fallbackReviews = [
@@ -64,6 +65,7 @@ function ReviewsSkeleton() {
 
 export function ReviewsSection() {
   const { reviews, loading } = useReviews();
+  const { content } = useLandingContent();
   const sectionRef = useRef<HTMLElement>(null);
 
   const displayReviews = reviews.length > 0 ? reviews.slice(0, 6) : fallbackReviews;
@@ -101,10 +103,11 @@ export function ReviewsSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            What Our Customers Say
+            {content?.reviewsSection?.heading || "What Our Customers Say"}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Real reviews from real customers who love KTalk Mehendi
+            {content?.reviewsSection?.subheading ||
+              "Real reviews from real customers who love KTalk Mehendi"}
           </p>
         </div>
 

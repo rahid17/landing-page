@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useLandingContent } from "@/hooks/use-landing-content";
 import { logEvent } from "@/services/analytics";
 import { Leaf, Phone, MapPin, Mail, ArrowRight } from "lucide-react";
 
@@ -10,6 +11,15 @@ function scrollToOrder() {
 }
 
 export function Footer() {
+  const { content } = useLandingContent();
+
+  const brandName = content?.footer?.brandName || "KTalk";
+  const tagline = content?.footer?.tagline || "Premium organic mehendi made from 100% natural henna leaves. Safe for your skin, beautiful for your occasions.";
+  const phone = content?.footer?.phone || "+880 1XXX-XXXXXX";
+  const email = content?.footer?.email || "hello@ktalk.com.bd";
+  const address = content?.footer?.address || "Dhaka, Bangladesh";
+  const copyright = content?.footer?.copyright || "\u00a9 2026 KTalk. All rights reserved.";
+
   const handleCTA = () => {
     logEvent("cta_click");
     scrollToOrder();
@@ -25,11 +35,10 @@ export function Footer() {
               <div className="w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center">
                 <Leaf className="w-5 h-5 text-amber-950" />
               </div>
-              <span className="text-xl font-bold">KTalk</span>
+              <span className="text-xl font-bold">{brandName}</span>
             </div>
             <p className="text-green-200/80 leading-relaxed mb-6">
-              Premium organic mehendi made from 100% natural henna leaves. Safe
-              for your skin, beautiful for your occasions.
+              {tagline}
             </p>
             <Button
               onClick={handleCTA}
@@ -69,31 +78,37 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <Phone className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                 <span className="text-green-200/80 text-sm">
-                  +880 1XXX-XXXXXX
+                  {phone}
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                 <span className="text-green-200/80 text-sm">
-                  hello@ktalk.com.bd
+                  {email}
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                 <span className="text-green-200/80 text-sm">
-                  Dhaka, Bangladesh
+                  {address}
                 </span>
               </li>
             </ul>
           </div>
         </div>
+
+        {content?.footerContent && (
+          <div className="mt-8 text-center text-green-200/60 text-sm">
+            {content.footerContent}
+          </div>
+        )}
       </div>
 
       <Separator className="bg-green-700/50" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-green-300/80">
-          <p>&copy; 2026 KTalk. All rights reserved.</p>
+          <p>{copyright}</p>
           <p>Made with love in Bangladesh</p>
         </div>
       </div>

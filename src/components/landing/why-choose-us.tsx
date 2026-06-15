@@ -16,6 +16,8 @@ export function WhyChooseUsSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
   const whyChooseUsText = content?.whyChooseUs || defaultText;
+  const heading = content?.whyChooseUsSection?.heading || "The KTalk Difference";
+  const subheading = content?.whyChooseUsSection?.subheading;
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -68,8 +70,12 @@ export function WhyChooseUsSection() {
 
           <div className="animate-on-scroll opacity-0 translate-x-4 transition-all duration-700 delay-200 [&.animate-visible]:opacity-100 [&.animate-visible]:translate-x-0">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-              The KTalk Difference
+              {heading}
             </h2>
+
+            {subheading && (
+              <p className="text-lg text-muted-foreground mb-4">{subheading}</p>
+            )}
 
             {loading ? (
               <div className="space-y-3">

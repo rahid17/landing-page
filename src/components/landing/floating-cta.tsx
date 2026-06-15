@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useLandingContent } from "@/hooks/use-landing-content";
 import { logEvent } from "@/services/analytics";
 import { ShoppingCart } from "lucide-react";
 
@@ -10,6 +11,7 @@ function scrollToOrder() {
 }
 
 export function FloatingCTA() {
+  const { content } = useLandingContent();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -31,6 +33,8 @@ export function FloatingCTA() {
     scrollToOrder();
   };
 
+  const ctaText = content?.hero?.ctaText || "Order Now";
+
   return (
     <div
       className={`fixed bottom-6 right-6 z-50 md:hidden transition-all duration-300 ${
@@ -45,7 +49,7 @@ export function FloatingCTA() {
         className="rounded-full px-6 py-6 bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/30 animate-pulse hover:animate-none"
       >
         <ShoppingCart className="w-5 h-5 mr-2" />
-        Order Now
+        {ctaText}
       </Button>
     </div>
   );

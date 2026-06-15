@@ -96,15 +96,37 @@ export interface HeroContent {
   title: string;
   subtitle: string;
   ctaText: string;
+  badgeText?: string;
+  deliveryInfo?: string;
+}
+
+export interface SectionHeadings {
+  heading?: string;
+  subheading?: string;
 }
 
 export interface LandingContent {
   id: string;
   hero: HeroContent;
   benefits: Benefit[];
+  benefitsSection: SectionHeadings;
   features: string[];
+  featuresSection: SectionHeadings;
   whyChooseUs: string;
+  whyChooseUsSection: SectionHeadings;
+  gallerySection: SectionHeadings;
+  reviewsSection: SectionHeadings;
+  faqSection: SectionHeadings;
+  orderSection: SectionHeadings;
   footerContent: string;
+  footer: {
+    brandName?: string;
+    tagline?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    copyright?: string;
+  };
 }
 
 export interface AnalyticsEvent {

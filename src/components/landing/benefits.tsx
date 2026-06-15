@@ -111,11 +111,11 @@ export function BenefitsSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Why Choose KTalk Mehendi?
+            {content?.benefitsSection?.heading || "Why Choose KTalk Mehendi?"}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Experience the difference of truly organic mehendi, crafted with
-            care for your special moments
+            {content?.benefitsSection?.subheading ||
+              "Experience the difference of truly organic mehendi, crafted with care for your special moments"}
           </p>
         </div>
 

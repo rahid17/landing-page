@@ -45,11 +45,11 @@ export function FeaturesSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            What Makes Our Mehendi Special
+            {content?.featuresSection?.heading || "What Makes Our Mehendi Special"}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Every cone of KTalk Mehendi is packed with features that ensure the
-            best experience
+            {content?.featuresSection?.subheading ||
+              "Every cone of KTalk Mehendi is packed with features that ensure the best experience"}
           </p>
         </div>
 

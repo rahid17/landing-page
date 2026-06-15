@@ -21,6 +21,7 @@ export function HeroSection() {
   const product = products?.[0];
   const hero = content?.hero;
   const price = product?.discountPrice ?? product?.price ?? 250;
+  const productImage = product?.images?.[0];
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -56,25 +57,39 @@ export function HeroSection() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center lg:justify-end order-2 lg:order-1 opacity-0 translate-y-4 transition-all duration-700">
-            <div className="relative">
-              <div className="w-72 h-72 sm:w-80 sm:h-80 rounded-3xl bg-white/10 backdrop-blur-sm border border-white/20 shadow-2xl flex items-center justify-center overflow-hidden">
-                <div className="text-center p-8">
-                  <Leaf className="w-20 h-20 text-green-300 mx-auto mb-4" />
-                  <div className="w-16 h-32 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full mx-auto shadow-lg transform rotate-12" />
-                  <div className="mt-4 h-1 w-24 bg-amber-400/50 rounded-full mx-auto" />
+            {productImage ? (
+              <div className="relative">
+                <img
+                  src={productImage}
+                  alt={product?.name ?? "KTalk Mehendi"}
+                  className="w-72 h-72 sm:w-80 sm:h-80 rounded-3xl object-cover shadow-2xl border border-white/20"
+                />
+                <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-2xl bg-amber-500/20 backdrop-blur-sm border border-amber-400/30 flex items-center justify-center">
+                  <Leaf className="w-8 h-8 text-amber-400" />
                 </div>
+                <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-green-500/20 backdrop-blur-sm border border-green-400/30" />
               </div>
-              <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-2xl bg-amber-500/20 backdrop-blur-sm border border-amber-400/30 flex items-center justify-center">
-                <Leaf className="w-8 h-8 text-amber-400" />
+            ) : (
+              <div className="relative">
+                <div className="w-72 h-72 sm:w-80 sm:h-80 rounded-3xl bg-white/10 backdrop-blur-sm border border-white/20 shadow-2xl flex items-center justify-center overflow-hidden">
+                  <div className="text-center p-8">
+                    <Leaf className="w-20 h-20 text-green-300 mx-auto mb-4" />
+                    <div className="w-16 h-32 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full mx-auto shadow-lg transform rotate-12" />
+                    <div className="mt-4 h-1 w-24 bg-amber-400/50 rounded-full mx-auto" />
+                  </div>
+                </div>
+                <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-2xl bg-amber-500/20 backdrop-blur-sm border border-amber-400/30 flex items-center justify-center">
+                  <Leaf className="w-8 h-8 text-amber-400" />
+                </div>
+                <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-green-500/20 backdrop-blur-sm border border-green-400/30" />
               </div>
-              <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-green-500/20 backdrop-blur-sm border border-green-400/30" />
-            </div>
+            )}
           </div>
 
           <div className="text-center lg:text-left order-1 lg:order-2 opacity-0 translate-y-4 transition-all duration-700 delay-200">
             <Badge className="mb-6 bg-amber-500/20 text-amber-300 border-amber-400/30 px-4 py-1.5 text-sm">
               <Leaf className="w-3.5 h-3.5 mr-1.5" />
-              100% Organic
+              {hero?.badgeText || "100% Organic"}
             </Badge>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
@@ -103,7 +118,7 @@ export function HeroSection() {
 
             <div className="mt-6 flex items-center justify-center lg:justify-start gap-2 text-green-200/80 text-sm">
               <Truck className="w-4 h-4" />
-              <span>Free delivery in Dhaka | Cash on Delivery available</span>
+              <span>{hero?.deliveryInfo || "Free delivery in Dhaka | Cash on Delivery available"}</span>
             </div>
           </div>
         </div>

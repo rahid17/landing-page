@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useProducts } from "@/hooks/use-products";
 import { useDistricts } from "@/hooks/use-districts";
 import { usePaymentSettings } from "@/hooks/use-payment-settings";
+import { useLandingContent } from "@/hooks/use-landing-content";
 import { createOrder } from "@/services/orders";
 import { logEvent } from "@/services/analytics";
 import { formatPrice } from "@/lib/utils";
@@ -32,6 +33,7 @@ export function OrderSection() {
   const { products, loading: productsLoading } = useProducts();
   const { activeDistricts, loading: districtsLoading } = useDistricts();
   const { paymentSettings, loading: paymentLoading } = usePaymentSettings();
+  const { content } = useLandingContent();
 
   const [form, setForm] = useState({
     productId: "",
@@ -172,11 +174,11 @@ export function OrderSection() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Place Your Order
+            {content?.orderSection?.heading || "Place Your Order"}
           </h2>
           <p className="text-muted-foreground">
-            Fill in your details below and we&apos;ll deliver fresh organic
-            mehendi to your doorstep
+            {content?.orderSection?.subheading ||
+              "Fill in your details below and we'll deliver fresh organic mehendi to your doorstep"}
           </p>
         </div>
 

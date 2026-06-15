@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useProducts } from "@/hooks/use-products";
+import { useLandingContent } from "@/hooks/use-landing-content";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, X, Image } from "lucide-react";
@@ -13,6 +14,7 @@ const placeholderImages = Array.from({ length: 6 }, (_, i) => ({
 
 export function GallerySection() {
   const { products, loading } = useProducts();
+  const { content } = useLandingContent();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const product = products?.[0];
@@ -39,10 +41,11 @@ export function GallerySection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Product Gallery
+            {content?.gallerySection?.heading || "Product Gallery"}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            See the rich, dark stains our organic mehendi delivers
+            {content?.gallerySection?.subheading ||
+              "See the rich, dark stains our organic mehendi delivers"}
           </p>
         </div>
 

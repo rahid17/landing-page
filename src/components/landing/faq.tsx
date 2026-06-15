@@ -1,6 +1,7 @@
 "use client";
 
 import { useFAQs } from "@/hooks/use-faqs";
+import { useLandingContent } from "@/hooks/use-landing-content";
 import {
   Accordion,
   AccordionItem,
@@ -62,6 +63,7 @@ function FAQSkeleton() {
 
 export function FAQSection() {
   const { faqs, loading } = useFAQs();
+  const { content } = useLandingContent();
 
   const displayFAQs = faqs.length > 0 ? faqs : fallbackFAQs;
 
@@ -70,10 +72,11 @@ export function FAQSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Frequently Asked Questions
+            {content?.faqSection?.heading || "Frequently Asked Questions"}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Got questions? We&apos;ve got answers about our organic mehendi
+            {content?.faqSection?.subheading ||
+              "Got questions? We've got answers about our organic mehendi"}
           </p>
         </div>
 

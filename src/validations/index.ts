@@ -71,6 +71,13 @@ export const heroContentSchema = z.object({
   title: z.string().min(2, "Title is required"),
   subtitle: z.string().min(2, "Subtitle is required"),
   ctaText: z.string().min(2, "CTA text is required"),
+  badgeText: z.string().optional(),
+  deliveryInfo: z.string().optional(),
+});
+
+export const sectionHeadingsSchema = z.object({
+  heading: z.string().optional(),
+  subheading: z.string().optional(),
 });
 
 export const landingContentSchema = z.object({
@@ -78,9 +85,24 @@ export const landingContentSchema = z.object({
   benefits: z
     .array(z.object({ title: z.string(), description: z.string(), icon: z.string() }))
     .optional(),
+  benefitsSection: sectionHeadingsSchema,
   features: z.array(z.string()).optional(),
+  featuresSection: sectionHeadingsSchema,
   whyChooseUs: z.string().optional(),
+  whyChooseUsSection: sectionHeadingsSchema,
+  gallerySection: sectionHeadingsSchema,
+  reviewsSection: sectionHeadingsSchema,
+  faqSection: sectionHeadingsSchema,
+  orderSection: sectionHeadingsSchema,
   footerContent: z.string().optional(),
+  footer: z.object({
+    brandName: z.string().optional(),
+    tagline: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.string().optional(),
+    address: z.string().optional(),
+    copyright: z.string().optional(),
+  }),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
