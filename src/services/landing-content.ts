@@ -48,6 +48,8 @@ function toLandingContent(row: Record<string, unknown>): LandingContent {
       title: (hero.title as string) ?? "",
       subtitle: (hero.subtitle as string) ?? "",
       ctaText: (hero.cta_text as string) ?? (hero.ctaText as string) ?? "",
+      image: (hero.image as string) ?? "",
+      logo: (hero.logo as string) ?? "",
       badgeText: (hero.badge_text as string) ?? (hero.badgeText as string) ?? "",
       deliveryInfo: (hero.delivery_info as string) ?? (hero.deliveryInfo as string) ?? "",
     },
@@ -69,6 +71,7 @@ function toLandingContent(row: Record<string, unknown>): LandingContent {
       email: (footer.email as string) ?? "",
       address: (footer.address as string) ?? "",
       copyright: (footer.copyright as string) ?? "",
+      contactItems: (footer.contact_items as LandingContent["footer"]["contactItems"]) ?? (footer.contactItems as LandingContent["footer"]["contactItems"]) ?? [],
     },
   };
 }
@@ -81,6 +84,8 @@ function toSnakeLanding(data: Partial<LandingContent>): Record<string, unknown> 
       title: data.hero.title,
       subtitle: data.hero.subtitle,
       cta_text: data.hero.ctaText,
+      image: data.hero.image,
+      logo: data.hero.logo,
       badge_text: data.hero.badgeText,
       delivery_info: data.hero.deliveryInfo,
     };
@@ -105,6 +110,7 @@ function toSnakeLanding(data: Partial<LandingContent>): Record<string, unknown> 
       email: data.footer.email,
       address: data.footer.address,
       copyright: data.footer.copyright,
+      contact_items: data.footer.contactItems,
     };
   }
 
