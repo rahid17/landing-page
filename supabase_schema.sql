@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   slug TEXT NOT NULL,
+  code TEXT NOT NULL DEFAULT '',
   description TEXT NOT NULL DEFAULT '',
   price NUMERIC NOT NULL DEFAULT 0,
   discount_price NUMERIC,
@@ -218,6 +219,9 @@ DROP POLICY IF EXISTS "Admin can read own record" ON admins;
 CREATE POLICY "Admin can read own record" ON admins FOR SELECT USING (auth.uid() = id);
 DROP POLICY IF EXISTS "Admin can insert own record" ON admins;
 CREATE POLICY "Admin can insert own record" ON admins FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- Add code column to existing products table (safe to run multiple times)
+ALTER TABLE products ADD COLUMN IF NOT EXISTS code TEXT NOT NULL DEFAULT '';
 
 -- Add photos column to existing reviews table (safe to run multiple times)
 ALTER TABLE reviews ADD COLUMN IF NOT EXISTS photos TEXT[] DEFAULT '{}';

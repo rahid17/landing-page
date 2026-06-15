@@ -19,6 +19,7 @@ export const orderFormSchema = z.object({
 export const productSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   slug: z.string().min(2, "Slug must be at least 2 characters"),
+  code: z.string().min(1, "Product code is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   price: z.number().positive("Price must be positive"),
   discountPrice: z.number().positive().optional(),

@@ -6,6 +6,7 @@ function toProduct(row: Record<string, unknown>): Product {
     id: row.id as string,
     name: row.name as string,
     slug: row.slug as string,
+    code: row.code as string,
     description: row.description as string,
     price: row.price as number,
     discountPrice: row.discount_price as number | undefined,
@@ -24,6 +25,7 @@ function toSnakeProduct(data: Partial<Product>): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   if (data.name !== undefined) result.name = data.name;
   if (data.slug !== undefined) result.slug = data.slug;
+  if (data.code !== undefined) result.code = data.code;
   if (data.description !== undefined) result.description = data.description;
   if (data.price !== undefined) result.price = data.price;
   if (data.discountPrice !== undefined) result.discount_price = data.discountPrice;
