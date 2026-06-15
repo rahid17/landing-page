@@ -20,6 +20,14 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Layout,
   Type,
@@ -33,6 +41,7 @@ import {
   Loader2,
   Plus,
   Trash2,
+  X,
 } from "lucide-react";
 
 const defaultFormValues: LandingContentFormData = {
@@ -61,6 +70,7 @@ const defaultFormValues: LandingContentFormData = {
     email: "",
     address: "",
     copyright: "",
+    contactItems: [],
   },
 };
 
@@ -122,6 +132,7 @@ export default function CMSPage() {
           email: content.footer?.email ?? "",
           address: content.footer?.address ?? "",
           copyright: content.footer?.copyright ?? "",
+          contactItems: content.footer?.contactItems ?? [],
         },
       });
     }
@@ -594,9 +605,78 @@ export default function CMSPage() {
                     <Label htmlFor="footer-copyright">Copyright</Label>
                     <Input
                       id="footer-copyright"
-                      placeholder="© 2026 KTalk. All rights reserved."
+                      placeholder="© 2026 Rahid. All rights reserved."
                       {...form.register("footer.copyright")}
                     />
+                  </div>
+
+                  <Separator className="sm:col-span-2" />
+                  <div className="space-y-3 sm:col-span-2">
+                    <Label>Contact Items</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Add, edit, or remove contact details shown in footer
+                    </p>
+                    {(form.watch("footer.contactItems") ?? []).map((_, i) => (
+                      <div key={i} className="flex items-start gap-2 p-3 border rounded-lg bg-muted/30">
+                        <div className="w-24 shrink-0 space-y-1">
+                          <Label className="text-xs">Icon</Label>
+                          <Select
+                            value={form.watch(`footer.contactItems.${i}.icon`) ?? "MapPin"}
+                            onValueChange={(v) => form.setValue(`footer.contactItems.${i}.icon`, v)}
+                          >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Phone">Phone</SelectItem>
+                              <SelectItem value="Mail">Mail</SelectItem>
+                              <SelectItem value="MapPin">MapPin</SelectItem>
+                              <SelectItem value="Globe">Globe</SelectItem>
+                              <SelectItem value="MessageCircle">Chat</SelectItem>
+                              <SelectItem value="ExternalLink">Link</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <Label className="text-xs">Text</Label>
+                          <Input
+                            placeholder="+880 1XXX-XXXXXX"
+                            {...form.register(`footer.contactItems.${i}.text`)}
+                          />
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <Label className="text-xs">URL (optional)</Label>
+                          <Input
+                            placeholder="https://..."
+                            {...form.register(`footer.contactItems.${i}.url`)}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="mt-5 text-destructive hover:text-destructive"
+                          onClick={() => {
+                            const items = form.watch("footer.contactItems") ?? [];
+                            form.setValue("footer.contactItems", items.filter((_, j) => j !== i));
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const items = form.watch("footer.contactItems") ?? [];
+                        form.setValue("footer.contactItems", [
+                          ...items,
+                          { icon: "MapPin", text: "", url: "" },
+                        ]);
+                      }}
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Add Contact Item
+                    </Button>
                   </div>
                 </div>
               </CardContent>

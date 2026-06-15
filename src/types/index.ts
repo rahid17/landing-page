@@ -111,6 +111,12 @@ export interface SectionHeadings {
   subheading?: string;
 }
 
+export interface FooterContactItem {
+  icon: string;
+  text: string;
+  url?: string;
+}
+
 export interface LandingContent {
   id: string;
   hero: HeroContent;
@@ -132,6 +138,7 @@ export interface LandingContent {
     email?: string;
     address?: string;
     copyright?: string;
+    contactItems?: FooterContactItem[];
   };
 }
 

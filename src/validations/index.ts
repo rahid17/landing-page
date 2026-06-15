@@ -112,6 +112,9 @@ export const landingContentSchema = z.object({
     email: z.string().optional(),
     address: z.string().optional(),
     copyright: z.string().optional(),
+    contactItems: z
+      .array(z.object({ icon: z.string(), text: z.string(), url: z.string().optional() }))
+      .optional(),
   }),
 });
 

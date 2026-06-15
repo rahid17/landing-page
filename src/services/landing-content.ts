@@ -27,7 +27,12 @@ const defaultLandingContent: LandingContent = {
     phone: "+880 1XXX-XXXXXX",
     email: "hello@ktalk.com.bd",
     address: "Dhaka, Bangladesh",
-    copyright: "© 2026 KTalk. All rights reserved.",
+    copyright: "© 2026 Rahid. All rights reserved.",
+    contactItems: [
+      { icon: "Phone", text: "+880 1XXX-XXXXXX" },
+      { icon: "Mail", text: "hello@ktalk.com.bd" },
+      { icon: "MapPin", text: "Dhaka, Bangladesh" },
+    ],
   },
 };
 

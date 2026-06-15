@@ -4,7 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useLandingContent } from "@/hooks/use-landing-content";
 import { logEvent } from "@/services/analytics";
-import { Leaf, Phone, MapPin, Mail, ArrowRight } from "lucide-react";
+import { Leaf, Phone, MapPin, Mail, ArrowRight, ExternalLink, Globe, MessageCircle } from "lucide-react";
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Phone,
+  Mail,
+  MapPin,
+  Globe,
+  MessageCircle,
+  ExternalLink,
+};
+
+function getIcon(iconName: string) {
+  return iconMap[iconName] || MapPin;
+}
 
 function scrollToOrder() {
   document.getElementById("order-section")?.scrollIntoView({ behavior: "smooth" });
@@ -14,11 +27,13 @@ export function Footer() {
   const { content } = useLandingContent();
 
   const brandName = content?.footer?.brandName || "KTalk";
-  const tagline = content?.footer?.tagline || "Premium organic mehendi made from 100% natural henna leaves. Safe for your skin, beautiful for your occasions.";
-  const phone = content?.footer?.phone || "+880 1XXX-XXXXXX";
-  const email = content?.footer?.email || "hello@ktalk.com.bd";
-  const address = content?.footer?.address || "Dhaka, Bangladesh";
-  const copyright = content?.footer?.copyright || "\u00a9 2026 KTalk. All rights reserved.";
+  const tagline = content?.footer?.tagline || "Premium organic mehendi made from 100% natural henna leaves.";
+  const copyright = content?.footer?.copyright || "\u00a9 2026 Rahid. All rights reserved.";
+  const contactItems = content?.footer?.contactItems || [
+    { icon: "Phone", text: "+880 1XXX-XXXXXX" },
+    { icon: "Mail", text: "hello@ktalk.com.bd" },
+    { icon: "MapPin", text: "Dhaka, Bangladesh" },
+  ];
 
   const handleCTA = () => {
     logEvent("cta_click");
@@ -75,24 +90,31 @@ export function Footer() {
           <div id="contact">
             <h4 className="font-semibold text-lg mb-4">Contact Us</h4>
             <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
-                <span className="text-green-200/80 text-sm">
-                  {phone}
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
-                <span className="text-green-200/80 text-sm">
-                  {email}
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
-                <span className="text-green-200/80 text-sm">
-                  {address}
-                </span>
-              </li>
+              {contactItems.map((item, i) => {
+                const Icon = getIcon(item.icon);
+                const content = (
+                  <li key={i} className="flex items-start gap-3">
+                    <Icon className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+                    <span className="text-green-200/80 text-sm">
+                      {item.text}
+                    </span>
+                  </li>
+                );
+                if (item.url) {
+                  return (
+                    <a
+                      key={i}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:opacity-80 transition-opacity"
+                    >
+                      {content}
+                    </a>
+                  );
+                }
+                return content;
+              })}
             </ul>
           </div>
         </div>
