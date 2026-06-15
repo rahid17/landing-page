@@ -49,6 +49,7 @@ const defaultFormValues: LandingContentFormData = {
     title: "",
     subtitle: "",
     ctaText: "",
+    image: "",
     badgeText: "",
     deliveryInfo: "",
   },
@@ -90,6 +91,7 @@ export default function CMSPage() {
           title: content.hero?.title ?? "",
           subtitle: content.hero?.subtitle ?? "",
           ctaText: content.hero?.ctaText ?? "",
+          image: content.hero?.image ?? "",
           badgeText: content.hero?.badgeText ?? "",
           deliveryInfo: content.hero?.deliveryInfo ?? "",
         },
@@ -283,6 +285,17 @@ export default function CMSPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="hero-image">Hero Image URL</Label>
+                  <Input
+                    id="hero-image"
+                    placeholder="https://example.com/hero-image.jpg"
+                    {...form.register("hero.image")}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty to use product image instead
+                  </p>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="hero-title">Title</Label>
                   <Input

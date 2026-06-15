@@ -100,8 +100,9 @@ export interface FAQ {
 
 export interface HeroContent {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   ctaText: string;
+  image?: string;
   badgeText?: string;
   deliveryInfo?: string;
 }

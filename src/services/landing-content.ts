@@ -7,6 +7,7 @@ const defaultLandingContent: LandingContent = {
     title: "",
     subtitle: "",
     ctaText: "",
+    image: "",
     badgeText: "100% Organic",
     deliveryInfo: "Free delivery in Dhaka | Cash on Delivery available",
   },
