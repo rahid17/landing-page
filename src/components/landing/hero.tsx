@@ -46,7 +46,7 @@ export function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-900 via-green-800 to-green-700 overflow-hidden opacity-0 translate-y-4 transition-all duration-700"
+      className="relative min-h-screen flex flex-col items-center justify-end bg-gradient-to-br from-green-900 via-green-800 to-green-700 overflow-hidden opacity-0 translate-y-4 transition-all duration-700"
     >
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-green-400 blur-3xl" />
