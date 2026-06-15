@@ -1,13 +1,4 @@
-import { db } from "@/lib/firebase";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  serverTimestamp,
-} from "firebase/firestore";
+import { supabase } from "@/lib/supabase";
 import type { AnalyticsEvent } from "@/types";
 
 export type AnalyticsSummary = {
@@ -17,36 +8,45 @@ export type AnalyticsSummary = {
   conversionRate: number;
 };
 
-const COLLECTION = "analytics";
+function toAnalyticsEvent(row: Record<string, unknown>): AnalyticsEvent {
+  return {
+    type: row.type as AnalyticsEvent["type"],
+    timestamp: row.created_at as string,
+    metadata: row.metadata as Record<string, unknown> | undefined,
+  };
+}
 
 export async function logEvent(
   type: "page_view" | "cta_click" | "order",
   metadata?: Record<string, unknown>
 ): Promise<void> {
-  await addDoc(collection(db, COLLECTION), {
+  const { error } = await supabase.from("analytics").insert({
     type,
-    timestamp: serverTimestamp(),
     metadata: metadata ?? null,
+    created_at: new Date().toISOString(),
   });
+  if (error) throw error;
 }
 
 export async function getAnalytics(
   startDate: Date,
   endDate: Date
 ): Promise<AnalyticsEvent[]> {
-  const q = query(
-    collection(db, COLLECTION),
-    where("timestamp", ">=", startDate),
-    where("timestamp", "<=", endDate),
-    orderBy("timestamp", "desc")
-  );
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => d.data()) as AnalyticsEvent[];
+  const { data, error } = await supabase
+    .from("analytics")
+    .select("*")
+    .gte("created_at", startDate.toISOString())
+    .lte("created_at", endDate.toISOString())
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(toAnalyticsEvent);
 }
 
 export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
-  const snapshot = await getDocs(collection(db, COLLECTION));
-  const events = snapshot.docs.map((d) => d.data()) as AnalyticsEvent[];
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  const events = await getAnalytics(thirtyDaysAgo, now);
 
   const totalVisitors = events.filter((e) => e.type === "page_view").length;
   const ctaClicks = events.filter((e) => e.type === "cta_click").length;

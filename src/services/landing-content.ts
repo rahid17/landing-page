@@ -1,12 +1,8 @@
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import type { LandingContent } from "@/types";
 
-const COLLECTION = "landing_content";
-const DOC_ID = "main";
-
 const defaultLandingContent: LandingContent = {
-  id: DOC_ID,
+  id: "main",
   hero: {
     title: "",
     subtitle: "",
@@ -35,14 +31,95 @@ const defaultLandingContent: LandingContent = {
   },
 };
 
+function toLandingContent(row: Record<string, unknown>): LandingContent {
+  const hero = (row.hero as Record<string, unknown>) ?? {};
+  const footer = (row.footer as Record<string, unknown>) ?? {};
+
+  return {
+    id: row.id as string,
+    hero: {
+      title: (hero.title as string) ?? "",
+      subtitle: (hero.subtitle as string) ?? "",
+      ctaText: (hero.cta_text as string) ?? (hero.ctaText as string) ?? "",
+      badgeText: (hero.badge_text as string) ?? (hero.badgeText as string) ?? "",
+      deliveryInfo: (hero.delivery_info as string) ?? (hero.deliveryInfo as string) ?? "",
+    },
+    benefits: (row.benefits as LandingContent["benefits"]) ?? [],
+    benefitsSection: (row.benefits_section as LandingContent["benefitsSection"]) ?? (row.benefitsSection as LandingContent["benefitsSection"]) ?? {},
+    features: (row.features as string[]) ?? [],
+    featuresSection: (row.features_section as LandingContent["featuresSection"]) ?? (row.featuresSection as LandingContent["featuresSection"]) ?? {},
+    whyChooseUs: row.why_choose_us as string ?? row.whyChooseUs as string ?? "",
+    whyChooseUsSection: (row.why_choose_us_section as LandingContent["whyChooseUsSection"]) ?? (row.whyChooseUsSection as LandingContent["whyChooseUsSection"]) ?? {},
+    gallerySection: (row.gallery_section as LandingContent["gallerySection"]) ?? (row.gallerySection as LandingContent["gallerySection"]) ?? {},
+    reviewsSection: (row.reviews_section as LandingContent["reviewsSection"]) ?? (row.reviewsSection as LandingContent["reviewsSection"]) ?? {},
+    faqSection: (row.faq_section as LandingContent["faqSection"]) ?? (row.faqSection as LandingContent["faqSection"]) ?? {},
+    orderSection: (row.order_section as LandingContent["orderSection"]) ?? (row.orderSection as LandingContent["orderSection"]) ?? {},
+    footerContent: row.footer_content as string ?? row.footerContent as string ?? "",
+    footer: {
+      brandName: (footer.brand_name as string) ?? (footer.brandName as string) ?? "",
+      tagline: (footer.tagline as string) ?? "",
+      phone: (footer.phone as string) ?? "",
+      email: (footer.email as string) ?? "",
+      address: (footer.address as string) ?? "",
+      copyright: (footer.copyright as string) ?? "",
+    },
+  };
+}
+
+function toSnakeLanding(data: Partial<LandingContent>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  if (data.hero !== undefined) {
+    result.hero = {
+      title: data.hero.title,
+      subtitle: data.hero.subtitle,
+      cta_text: data.hero.ctaText,
+      badge_text: data.hero.badgeText,
+      delivery_info: data.hero.deliveryInfo,
+    };
+  }
+  if (data.benefits !== undefined) result.benefits = data.benefits;
+  if (data.benefitsSection !== undefined) result.benefits_section = data.benefitsSection;
+  if (data.features !== undefined) result.features = data.features;
+  if (data.featuresSection !== undefined) result.features_section = data.featuresSection;
+  if (data.whyChooseUs !== undefined) result.why_choose_us = data.whyChooseUs;
+  if (data.whyChooseUsSection !== undefined) result.why_choose_us_section = data.whyChooseUsSection;
+  if (data.gallerySection !== undefined) result.gallery_section = data.gallerySection;
+  if (data.reviewsSection !== undefined) result.reviews_section = data.reviewsSection;
+  if (data.faqSection !== undefined) result.faq_section = data.faqSection;
+  if (data.orderSection !== undefined) result.order_section = data.orderSection;
+  if (data.footerContent !== undefined) result.footer_content = data.footerContent;
+
+  if (data.footer !== undefined) {
+    result.footer = {
+      brand_name: data.footer.brandName,
+      tagline: data.footer.tagline,
+      phone: data.footer.phone,
+      email: data.footer.email,
+      address: data.footer.address,
+      copyright: data.footer.copyright,
+    };
+  }
+
+  return result;
+}
+
 export async function getLandingContent(): Promise<LandingContent> {
-  const snap = await getDoc(doc(db, COLLECTION, DOC_ID));
-  if (!snap.exists()) return { ...defaultLandingContent };
-  return { id: snap.id, ...snap.data() } as LandingContent;
+  const { data, error } = await supabase
+    .from("landing_content")
+    .select("*")
+    .eq("id", "main")
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return { ...defaultLandingContent };
+  return toLandingContent(data);
 }
 
 export async function updateLandingContent(
   data: Partial<LandingContent>
 ): Promise<void> {
-  await setDoc(doc(db, COLLECTION, DOC_ID), data, { merge: true });
+  const { error } = await supabase
+    .from("landing_content")
+    .upsert({ id: "main", ...toSnakeLanding(data) });
+  if (error) throw error;
 }

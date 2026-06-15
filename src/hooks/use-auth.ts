@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { type User } from "firebase/auth";
+import { type User } from "@supabase/supabase-js";
 import { loginWithEmail, logout, onAuthChange } from "@/services/auth";
 
 export function useAuth() {

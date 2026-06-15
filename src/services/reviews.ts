@@ -1,46 +1,65 @@
-import { db } from "@/lib/firebase";
-import {
-  collection,
-  doc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  orderBy,
-  serverTimestamp,
-} from "firebase/firestore";
+import { supabase } from "@/lib/supabase";
 import type { Review } from "@/types";
 
-const COLLECTION = "reviews";
+function toReview(row: Record<string, unknown>): Review {
+  return {
+    id: row.id as string,
+    customerName: row.customer_name as string,
+    photoURL: row.photoURL as string | undefined,
+    text: row.text as string,
+    rating: row.rating as number,
+    createdAt: row.created_at as string,
+  };
+}
 
 export async function getReviews(): Promise<Review[]> {
-  const q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as Review);
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(toReview);
 }
 
 export async function createReview(
   data: Omit<Review, "id" | "createdAt">
 ): Promise<Review> {
-  const docRef = await addDoc(collection(db, COLLECTION), {
-    ...data,
-    createdAt: serverTimestamp(),
-  });
-  return {
-    id: docRef.id,
-    ...data,
-    createdAt: new Date().toISOString(),
-  } as Review;
+  const { data: inserted, error } = await supabase
+    .from("reviews")
+    .insert({
+      customer_name: data.customerName,
+      photoURL: data.photoURL ?? null,
+      text: data.text,
+      rating: data.rating,
+      created_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return toReview(inserted);
 }
 
 export async function updateReview(
   id: string,
   data: Partial<Review>
 ): Promise<void> {
-  await updateDoc(doc(db, COLLECTION, id), data);
+  const updates: Record<string, unknown> = {};
+  if (data.customerName !== undefined) updates.customer_name = data.customerName;
+  if (data.photoURL !== undefined) updates.photoURL = data.photoURL;
+  if (data.text !== undefined) updates.text = data.text;
+  if (data.rating !== undefined) updates.rating = data.rating;
+
+  const { error } = await supabase
+    .from("reviews")
+    .update(updates)
+    .eq("id", id);
+  if (error) throw error;
 }
 
 export async function deleteReview(id: string): Promise<void> {
-  await deleteDoc(doc(db, COLLECTION, id));
+  const { error } = await supabase
+    .from("reviews")
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
 }

@@ -147,11 +147,11 @@ export default function AdminLayout({
               className="flex items-center gap-1 text-xs text-sidebar-foreground/40 hover:text-sidebar-foreground/70 px-1 font-mono transition-colors w-full"
               title="Click to copy your User UID"
               onClick={() => {
-                navigator.clipboard.writeText(user.uid);
-                toast.success("User UID copied! Add it to Firestore admins collection.");
+                navigator.clipboard.writeText(user.id);
+                toast.success("User ID copied! Add it to Supabase admins table.");
               }}
             >
-              <span className="truncate">UID: {user.uid.substring(0, 16)}...</span>
+              <span className="truncate">ID: {user.id.substring(0, 12)}...</span>
               <Copy className="h-3 w-3 shrink-0" />
             </button>
           </div>

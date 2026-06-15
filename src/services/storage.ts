@@ -1,11 +1,16 @@
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 
 export async function uploadImage(
   file: File,
   path: string
 ): Promise<string> {
-  const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, file);
-  return getDownloadURL(storageRef);
+  const { data, error } = await supabase.storage
+    .from("images")
+    .upload(path, file, { upsert: true });
+  if (error) throw error;
+
+  const { data: urlData } = supabase.storage
+    .from("images")
+    .getPublicUrl(data.path);
+  return urlData.publicUrl;
 }
