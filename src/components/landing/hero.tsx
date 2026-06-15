@@ -73,7 +73,7 @@ export function HeroSection() {
         </div>
       )}
 
-      <div className="relative z-10 flex flex-col items-center gap-6 px-4 pt-16 pb-20">
+      <div className="relative z-10 flex flex-col items-center gap-6 px-4 pt-32 sm:pt-40 md:pt-52 pb-20">
 
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center max-w-3xl leading-tight">
           {hero?.title ?? "Premium Organic Mehendi"}
