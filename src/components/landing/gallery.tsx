@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useProducts } from "@/hooks/use-products";
 import { useLandingContent } from "@/hooks/use-landing-content";
+import { formatPrice } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, X, Image } from "lucide-react";
@@ -56,41 +57,57 @@ export function GallerySection() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {hasImages
-              ? images!.map((src, index) => (
-                  <button
-                    key={src}
-                    onClick={() => openLightbox(index)}
-                    className="group relative aspect-square rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all"
-                  >
-                    <img
-                      src={src}
-                      alt={`Mehendi design ${index + 1}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                  </button>
-                ))
-              : placeholderImages.map(({ id, index }) => (
-                  <button
-                    key={id}
-                    onClick={() => openLightbox(index)}
-                    className="group relative aspect-square rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all bg-gradient-to-br from-green-50 to-amber-50 dark:from-green-950 dark:to-amber-950"
-                  >
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
-                      <Image className="w-10 h-10 mb-2 opacity-40" />
-                      <span className="text-xs opacity-40">
-                        Mehendi Design {index + 1}
-                      </span>
-                    </div>
-                    <div className="absolute inset-0 opacity-10">
-                      <div className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 border-green-400" />
-                      <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full border-2 border-amber-400" />
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-1 bg-green-400 rounded-full transform rotate-45" />
-                    </div>
-                  </button>
-                ))}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {hasImages
+                ? images!.map((src, index) => (
+                    <button
+                      key={src}
+                      onClick={() => openLightbox(index)}
+                      className="group relative aspect-square rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all"
+                    >
+                      <img
+                        src={src}
+                        alt={`${product?.name ?? "Mehendi"} design ${index + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3 text-left">
+                        <p className="text-white font-semibold text-sm truncate">
+                          {product?.name ?? "Mehendi"}
+                        </p>
+                        <p className="text-amber-300 font-bold text-sm">
+                          {formatPrice(product?.discountPrice ?? product?.price ?? 0)}
+                        </p>
+                      </div>
+                    </button>
+                  ))
+                : placeholderImages.map(({ id, index }) => (
+                    <button
+                      key={id}
+                      onClick={() => openLightbox(index)}
+                      className="group relative aspect-square rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all bg-gradient-to-br from-green-50 to-amber-50 dark:from-green-950 dark:to-amber-950"
+                    >
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
+                        <Image className="w-10 h-10 mb-2 opacity-40" />
+                        <span className="text-xs opacity-40">
+                          Mehendi Design {index + 1}
+                        </span>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-3 text-left">
+                        <p className="text-foreground font-semibold text-sm truncate">
+                          {product?.name ?? "KTalk Mehendi"}
+                        </p>
+                        <p className="text-primary font-bold text-sm">
+                          {formatPrice(product?.discountPrice ?? product?.price ?? 250)}
+                        </p>
+                      </div>
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 border-green-400" />
+                        <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full border-2 border-amber-400" />
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-1 bg-green-400 rounded-full transform rotate-45" />
+                      </div>
+                    </button>
+                  ))}
           </div>
         )}
 

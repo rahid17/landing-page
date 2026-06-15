@@ -178,43 +178,37 @@ export function OrderSection() {
 
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm truncate">{product.name}</p>
-                            <p className="text-sm text-primary font-semibold">
-                              {formatPrice(price)}
-                              {product.discountPrice && (
-                                <span className="text-xs text-muted-foreground line-through ml-1">
-                                  {formatPrice(product.price)}
-                                </span>
-                              )}
-                            </p>
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => setQuantity(product.id, qty - 1)}
-                              disabled={qty === 0}
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <Input
-                              type="number"
-                              min={0}
-                              value={qty}
-                              onChange={(e) => setQuantity(product.id, parseInt(e.target.value) || 0)}
-                              className="h-8 w-14 text-center text-sm [&::-webkit-inner-spin-button]:opacity-100"
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => setQuantity(product.id, qty + 1)}
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => setQuantity(product.id, qty - 1)}
+                                disabled={qty === 0}
+                              >
+                                <Minus className="h-2.5 w-2.5" />
+                              </Button>
+                              <Input
+                                type="number"
+                                min={0}
+                                value={qty}
+                                onChange={(e) => setQuantity(product.id, parseInt(e.target.value) || 0)}
+                                className="h-6 w-11 text-center text-xs [&::-webkit-inner-spin-button]:opacity-100 px-0"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => setQuantity(product.id, qty + 1)}
+                              >
+                                <Plus className="h-2.5 w-2.5" />
+                              </Button>
+                              <span className="text-xs text-primary font-semibold ml-1">
+                                {formatPrice(price)} each
+                              </span>
+                            </div>
                           </div>
 
                           <div className="text-right shrink-0 w-20">
