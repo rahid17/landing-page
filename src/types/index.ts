@@ -79,7 +79,7 @@ export interface PaymentSettings {
 export interface Review {
   id: string;
   customerName: string;
-  photoURL?: string;
+  photos: string[];
   text: string;
   rating: number;
   createdAt: string;

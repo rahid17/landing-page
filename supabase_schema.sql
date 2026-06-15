@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS payment_settings (
 CREATE TABLE IF NOT EXISTS reviews (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   customer_name TEXT NOT NULL,
-  photo_url TEXT,
+  photos TEXT[] DEFAULT '{}',
   text TEXT NOT NULL,
   rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -219,7 +219,8 @@ CREATE POLICY "Admin can read own record" ON admins FOR SELECT USING (auth.uid()
 DROP POLICY IF EXISTS "Admin can insert own record" ON admins;
 CREATE POLICY "Admin can insert own record" ON admins FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Create indexes for common queries
+-- Add photos column to existing reviews table (safe to run multiple times)
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS photos TEXT[] DEFAULT '{}';
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_products_active ON products(active);

@@ -56,7 +56,7 @@ export const paymentSettingsSchema = z.object({
 
 export const reviewSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
-  photoURL: z.string().optional(),
+  photos: z.array(z.string()).max(5, "Maximum 5 photos").optional(),
   text: z.string().min(5, "Review text must be at least 5 characters"),
   rating: z.number().min(1).max(5),
 });

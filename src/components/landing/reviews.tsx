@@ -11,16 +11,19 @@ import { Star, Quote } from "lucide-react";
 const fallbackReviews = [
   {
     customerName: "Fatima",
+    photos: [] as string[],
     text: "Amazing quality! The color lasted so long and my design was beautiful. Will definitely order again.",
     rating: 5,
   },
   {
     customerName: "Ayesha",
+    photos: [] as string[],
     text: "Best mehendi I've ever used. No irritation at all and the stain was so dark and rich!",
     rating: 5,
   },
   {
     customerName: "Sadia",
+    photos: [] as string[],
     text: "Quick delivery and great product. Highly recommend! The packaging was also very nice.",
     rating: 5,
   },
@@ -128,14 +131,23 @@ export function ReviewsSection() {
                   </p>
                   <div className="mt-4 flex items-center gap-3 border-t border-border pt-4">
                     <Avatar className="w-9 h-9">
-                      {"photoURL" in review && <AvatarImage src={(review as any).photoURL} />}
+                      {review.photos && review.photos.length > 0 && (
+                        <AvatarImage src={review.photos[0]} alt={review.customerName} />
+                      )}
                       <AvatarFallback className="bg-primary/10 text-primary text-sm">
                         {getInitials(review.customerName)}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="font-semibold text-foreground text-sm">
-                      {review.customerName}
-                    </span>
+                    <div>
+                      <span className="font-semibold text-foreground text-sm">
+                        {review.customerName}
+                      </span>
+                      {review.photos && review.photos.length > 0 && (
+                        <span className="text-xs text-muted-foreground ml-2">
+                          +{review.photos.length} photo{review.photos.length > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
