@@ -171,6 +171,7 @@ export default function OrdersPage() {
                   <TableHead>Order #</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Phone</TableHead>
+                  <TableHead>Address</TableHead>
                   <TableHead>Products</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Payment</TableHead>
@@ -183,7 +184,7 @@ export default function OrdersPage() {
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}>
-                      {Array.from({ length: 9 }).map((_, j) => (
+                      {Array.from({ length: 10 }).map((_, j) => (
                         <TableCell key={j}>
                           <Skeleton className="h-4 w-16" />
                         </TableCell>
@@ -192,7 +193,7 @@ export default function OrdersPage() {
                   ))
                 ) : !filteredOrders.length ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
+                    <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
                       No orders found
                     </TableCell>
                   </TableRow>
@@ -208,6 +209,7 @@ export default function OrdersPage() {
                       </TableCell>
                       <TableCell>{order.customerName}</TableCell>
                       <TableCell>{order.phone}</TableCell>
+                      <TableCell className="max-w-32 truncate text-xs">{order.address}</TableCell>
                       <TableCell>
                         <span className="text-sm">
                           {order.items.length} item{order.items.length !== 1 ? "s" : ""}
