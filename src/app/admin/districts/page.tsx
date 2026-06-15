@@ -5,8 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useDistricts } from "@/hooks/use-districts";
-import { createDistrict, updateDistrict, deleteDistrict, toggleDistrictActive } from "@/services/districts";
-import { districtSchema, type DistrictFormData } from "@/validations";
+import { updateDistrict, toggleDistrictActive } from "@/services/districts";
 import type { District } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,31 +30,20 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice } from "@/lib/utils";
-import { Plus, Pencil, Trash2, Loader2, AlertCircle } from "lucide-react";
+import { Pencil, Loader2, AlertCircle } from "lucide-react";
 
 export default function DistrictsPage() {
   const { districts, loading, error, refresh } = useDistricts();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
   const [editingDistrict, setEditingDistrict] = useState<District | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
-  const form = useForm<DistrictFormData>({
-    resolver: zodResolver(districtSchema),
-    defaultValues: { name: "", deliveryCharge: 0, active: true },
+  const form = useForm({
+    defaultValues: { deliveryCharge: 0, active: true },
   });
-
-  const openAdd = () => {
-    form.reset({ name: "", deliveryCharge: 0, active: true });
-    setEditingDistrict(null);
-    setDialogOpen(true);
-  };
 
   const openEdit = (district: District) => {
     form.reset({
-      name: district.name,
       deliveryCharge: district.deliveryCharge,
       active: district.active,
     });
@@ -63,38 +51,24 @@ export default function DistrictsPage() {
     setDialogOpen(true);
   };
 
-  const onSubmit = async (data: DistrictFormData) => {
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDistrict) return;
+
+    const data = form.getValues();
     setSubmitting(true);
     try {
-      if (editingDistrict) {
-        await updateDistrict(editingDistrict.id, data);
-        toast.success("District updated");
-      } else {
-        await createDistrict(data);
-        toast.success("District added");
-      }
+      await updateDistrict(editingDistrict.id, {
+        deliveryCharge: Number(data.deliveryCharge),
+        active: data.active,
+      });
+      toast.success(`${editingDistrict.name} updated`);
       setDialogOpen(false);
       refresh();
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Failed to update district");
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!deletingId) return;
-    setDeleting(true);
-    try {
-      await deleteDistrict(deletingId);
-      toast.success("District deleted");
-      setDeleteOpen(false);
-      refresh();
-    } catch {
-      toast.error("Failed to delete");
-    } finally {
-      setDeleting(false);
-      setDeletingId(null);
     }
   };
 
@@ -113,12 +87,8 @@ export default function DistrictsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Delivery Charges</h1>
-          <p className="text-muted-foreground">Manage districts and delivery fees</p>
+          <p className="text-muted-foreground">Manage delivery fees for all districts</p>
         </div>
-        <Button onClick={openAdd}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add District
-        </Button>
       </div>
 
       <Card>
@@ -130,17 +100,17 @@ export default function DistrictsPage() {
                   <TableHead>District</TableHead>
                   <TableHead>Delivery Charge</TableHead>
                   <TableHead>Active</TableHead>
-                  <TableHead className="w-24">Actions</TableHead>
+                  <TableHead className="w-20">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
+                  Array.from({ length: 8 }).map((_, i) => (
                     <TableRow key={i}>
-                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-40" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-9" /></TableCell>
-                      <TableCell><Skeleton className="h-8 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                     </TableRow>
                   ))
                 ) : error ? (
@@ -157,7 +127,7 @@ export default function DistrictsPage() {
                 ) : !districts.length ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
-                      No districts yet. Add your first district.
+                      No districts found. Run the seed SQL to populate districts.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -173,31 +143,18 @@ export default function DistrictsPage() {
                         <Switch
                           checked={district.active}
                           onCheckedChange={(v) => handleToggle(district.id, v)}
-                          aria-label={`Toggle district ${district.name}`}
+                          aria-label={`Toggle ${district.name}`}
                         />
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openEdit(district)}
-                            aria-label="Edit district"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setDeletingId(district.id);
-                              setDeleteOpen(true);
-                            }}
-                            aria-label="Delete district"
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEdit(district)}
+                          aria-label={`Edit ${district.name}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
@@ -212,42 +169,39 @@ export default function DistrictsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingDistrict ? "Edit District" : "Add District"}
+              Edit {editingDistrict?.name}
             </DialogTitle>
             <DialogDescription>
-              Set the district name and delivery charge
+              Update the delivery charge for this district
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">District Name</Label>
-              <Input id="name" {...form.register("name")} />
-              {form.formState.errors.name && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.name.message}
-                </p>
-              )}
+              <Input
+                id="name"
+                value={editingDistrict?.name ?? ""}
+                disabled
+                className="bg-muted cursor-not-allowed"
+              />
+              <p className="text-xs text-muted-foreground">District names cannot be changed</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="deliveryCharge">Delivery Charge (৳)</Label>
               <Input
                 id="deliveryCharge"
                 type="number"
+                min={0}
                 {...form.register("deliveryCharge", { valueAsNumber: true })}
               />
-              {form.formState.errors.deliveryCharge && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.deliveryCharge.message}
-                </p>
-              )}
             </div>
             <div className="flex items-center gap-2">
               <Switch
-                id="active"
+                id="active-edit"
                 checked={form.watch("active")}
                 onCheckedChange={(v) => form.setValue("active", v)}
               />
-              <Label htmlFor="active">Active</Label>
+              <Label htmlFor="active-edit">Active</Label>
             </div>
             <DialogFooter>
               <Button
@@ -259,34 +213,10 @@ export default function DistrictsPage() {
               </Button>
               <Button type="submit" disabled={submitting}>
                 {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                {editingDistrict ? "Update" : "Add"}
+                Save
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete District</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to remove this district?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
-              {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Delete
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
