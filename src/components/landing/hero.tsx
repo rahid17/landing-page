@@ -6,7 +6,7 @@ import { useLandingContent } from "@/hooks/use-landing-content";
 import { useProducts } from "@/hooks/use-products";
 import { logEvent } from "@/services/analytics";
 import { formatPrice } from "@/lib/utils";
-import { ShoppingCart, Leaf } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 
 function scrollToOrder() {
   document.getElementById("order-section")?.scrollIntoView({ behavior: "smooth" });
@@ -53,6 +53,15 @@ export function HeroSection() {
         <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-amber-400 blur-3xl" />
       </div>
 
+      {/* Full-screen hero background image */}
+      {heroImage && (
+        <img
+          src={heroImage}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-[0.85]"
+        />
+      )}
+
       {/* Logo - top left */}
       {hero?.logo && (
         <div className="absolute top-4 sm:top-6 left-4 sm:left-8 z-20">
@@ -65,20 +74,6 @@ export function HeroSection() {
       )}
 
       <div className="relative z-10 flex flex-col items-center gap-6 px-4 pt-16 pb-20">
-        {heroImage ? (
-          <img
-            src={heroImage}
-            alt={hero?.title ?? "Premium Organic Mehendi"}
-            className="w-48 h-48 sm:w-60 sm:h-60 md:w-80 md:h-80 rounded-3xl object-cover shadow-2xl border-4 border-white/20"
-          />
-        ) : (
-          <div className="w-48 h-48 sm:w-60 sm:h-60 md:w-80 md:h-80 rounded-3xl bg-white/10 backdrop-blur-sm border-4 border-white/20 shadow-2xl flex items-center justify-center overflow-hidden">
-            <div className="text-center p-4">
-              <Leaf className="w-16 h-16 sm:w-20 sm:h-20 text-green-300 mx-auto mb-2" />
-              <div className="w-12 h-24 sm:w-16 sm:h-32 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full mx-auto shadow-lg transform rotate-12" />
-            </div>
-          </div>
-        )}
 
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center max-w-3xl leading-tight">
           {hero?.title ?? "Premium Organic Mehendi"}
