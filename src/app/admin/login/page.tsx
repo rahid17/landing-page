@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
           <div className="mx-auto mb-2 h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
             <LayoutDashboard className="h-6 w-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl">KTalk Admin</CardTitle>
+          <CardTitle className="text-2xl">Admin Panel</CardTitle>
           <CardDescription>Sign in to manage your store</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -63,7 +63,7 @@ export default function AdminLoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@ktalk.com"
+                placeholder="admin@example.com"
                 {...register("email")}
                 aria-invalid={!!errors.email}
               />

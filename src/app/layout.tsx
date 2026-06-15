@@ -14,19 +14,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KTalk - Premium Organic Mehendi | Buy Online in Bangladesh",
+  title: "Organic Mehendi - Buy Online in Bangladesh",
   description:
-    "KTalk offers 100% organic, chemical-free mehendi made from pure henna leaves. Safe for skin, long-lasting color. Order online with cash on delivery across Bangladesh.",
+    "100% organic, chemical-free mehendi made from pure henna leaves. Safe for skin, long-lasting color. Order online with cash on delivery across Bangladesh.",
   openGraph: {
-    title: "KTalk - Premium Organic Mehendi | Buy Online in Bangladesh",
+    title: "Organic Mehendi - Buy Online in Bangladesh",
     description:
-      "100% organic, chemical-free mehendi made from pure henna leaves. Safe for skin, long-lasting color. Order now!",
+      "100% organic, chemical-free mehendi made from pure henna leaves. Safe for skin, long-lasting color. Order online with cash on delivery across Bangladesh.",
+    siteName: "Organic Mehendi",
     type: "website",
-    siteName: "KTalk",
   },
   twitter: {
     card: "summary_large_image",
-    title: "KTalk - Premium Organic Mehendi",
+    title: "Organic Mehendi",
     description:
       "100% organic mehendi. Natural, safe, and long-lasting color for your special occasions.",
   },

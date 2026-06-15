@@ -5,9 +5,9 @@ import { useLandingContent } from "@/hooks/use-landing-content";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle, Leaf } from "lucide-react";
 
-const defaultText = `At KTalk, we believe in the purity of tradition. Our mehendi is sourced from the finest organic henna farms, ensuring that every cone delivers a rich, dark, and long-lasting stain without any harmful chemicals.
+const defaultText = `We believe in the purity of tradition. Our mehendi is sourced from the finest organic henna farms, ensuring that every cone delivers a rich, dark, and long-lasting stain without any harmful chemicals.
 
-We carefully process our henna leaves to preserve their natural dye content, giving you the deepest color possible. Whether it's for a wedding, Eid celebration, or any special occasion, KTalk Mehendi is your trusted companion for beautiful and safe body art.
+We carefully process our henna leaves to preserve their natural dye content, giving you the deepest color possible. Whether it's for a wedding, Eid celebration, or any special occasion, our mehendi is your trusted companion for beautiful and safe body art.
 
 Our commitment to quality means no PPD, no ammonia, and no synthetic dyes — just pure, natural mehendi that's gentle on your skin and kind to the environment.`;
 
@@ -16,7 +16,7 @@ export function WhyChooseUsSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
   const whyChooseUsText = content?.whyChooseUs || defaultText;
-  const heading = content?.whyChooseUsSection?.heading || "The KTalk Difference";
+  const heading = content?.whyChooseUsSection?.heading || "The Organic Difference";
   const subheading = content?.whyChooseUsSection?.subheading;
 
   useEffect(() => {

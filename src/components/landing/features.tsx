@@ -49,7 +49,7 @@ export function FeaturesSection() {
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             {content?.featuresSection?.subheading ||
-              "Every cone of KTalk Mehendi is packed with features that ensure the best experience"}
+              "Every cone is packed with features that ensure the best experience"}
           </p>
         </div>
 

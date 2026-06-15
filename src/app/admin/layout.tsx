@@ -97,7 +97,7 @@ export default function AdminLayout({
               <LayoutDashboard className="h-4 w-4 text-sidebar-primary-foreground" />
             </div>
             <span className="text-lg font-bold text-sidebar-foreground">
-              KTalk Admin
+              Admin Panel
             </span>
           </Link>
           <button

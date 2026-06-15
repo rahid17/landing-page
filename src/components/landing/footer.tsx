@@ -26,12 +26,12 @@ function scrollToOrder() {
 export function Footer() {
   const { content } = useLandingContent();
 
-  const brandName = content?.footer?.brandName || "KTalk";
+  const brandName = content?.footer?.brandName || "Organic Mehendi";
   const tagline = content?.footer?.tagline || "Premium organic mehendi made from 100% natural henna leaves.";
   const copyright = content?.footer?.copyright || "\u00a9 2026 Rahid. All rights reserved.";
   const contactItems = content?.footer?.contactItems || [
     { icon: "Phone", text: "+880 1XXX-XXXXXX" },
-    { icon: "Mail", text: "hello@ktalk.com.bd" },
+    { icon: "Mail", text: "hello@domain.com" },
     { icon: "MapPin", text: "Dhaka, Bangladesh" },
   ];
 

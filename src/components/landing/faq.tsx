@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const fallbackFAQs = [
   {
     id: "1",
-    question: "Is KTalk Mehendi 100% natural?",
+    question: "Is this mehendi 100% natural?",
     answer:
       "Yes! Our mehendi is made from pure organic henna leaves with no chemicals or additives. We source from trusted farms to ensure the highest quality.",
     order: 1,

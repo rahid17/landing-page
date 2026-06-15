@@ -42,7 +42,7 @@ export function GallerySection() {
       for (let i = 0; i < 6; i++) {
         items.push({
           productId: "",
-          productName: "KTalk Mehendi",
+          productName: "Organic Mehendi",
           price: 250,
           src: null,
           index: i,

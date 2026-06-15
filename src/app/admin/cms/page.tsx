@@ -748,7 +748,7 @@ export default function CMSPage() {
                     <Label htmlFor="footer-brand">Brand Name</Label>
                     <Input
                       id="footer-brand"
-                      placeholder="KTalk"
+                      placeholder="Brand Name"
                       {...form.register("footer.brandName")}
                     />
                   </div>
@@ -778,7 +778,7 @@ export default function CMSPage() {
                     </Label>
                     <Input
                       id="footer-email"
-                      placeholder="hello@ktalk.com.bd"
+                      placeholder="hello@domain.com"
                       {...form.register("footer.email")}
                     />
                   </div>

@@ -261,7 +261,7 @@ export function ReviewsSection() {
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             {content?.reviewsSection?.subheading ||
-              "Real reviews from real customers who love KTalk Mehendi"}
+              "Real reviews from real customers who love our mehendi"}
           </p>
         </div>
 
