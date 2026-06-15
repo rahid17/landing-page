@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useReviews } from "@/hooks/use-reviews";
 import { useLandingContent } from "@/hooks/use-landing-content";
-import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 
 const fallbackReviews = [
   {
@@ -71,6 +71,100 @@ function ReviewsSkeleton() {
           </Card>
         </div>
       ))}
+    </div>
+  );
+}
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+function ReviewCard({ review }: { review: typeof fallbackReviews[number] }) {
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+  const photos = review.photos ?? [];
+  const hasMultiplePhotos = photos.length > 1;
+  const isLongText = review.text.length > 120;
+  const displayText = expanded || !isLongText ? review.text : review.text.slice(0, 120) + "...";
+
+  const nextPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPhotoIndex((prev) => (prev + 1) % photos.length);
+  };
+  const prevPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length);
+  };
+
+  return (
+    <div className="min-w-[300px] sm:min-w-[350px] md:w-1/2 lg:w-1/3 flex-shrink-0 px-2 select-none">
+      <Card className="border-border/60 hover:border-primary/20 hover:shadow-md transition-all duration-300 h-full">
+        {/* Photos */}
+        {photos.length > 0 && (
+          <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-xl">
+            <img
+              src={photos[photoIndex]}
+              alt={`${review.customerName} photo ${photoIndex + 1}`}
+              className="w-full h-full object-cover"
+            />
+            {hasMultiplePhotos && (
+              <>
+                <button
+                  onClick={prevPhoto}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={nextPhoto}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
+                  {photoIndex + 1}/{photos.length}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        <CardContent className="p-5">
+          <p className="text-muted-foreground leading-relaxed text-sm">
+            {displayText}
+          </p>
+          {isLongText && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="text-primary text-xs font-medium mt-1 hover:underline"
+            >
+              {expanded ? "See less" : "See more"}
+            </button>
+          )}
+
+          <div className="mt-3">
+            <StarRating rating={review.rating} />
+          </div>
+
+          <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
+            {photos.length === 0 && (
+              <Avatar className="h-7 w-7">
+                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                  {getInitials(review.customerName)}
+                </AvatarFallback>
+              </Avatar>
+            )}
+            <span className="font-semibold text-foreground text-sm">
+              {review.customerName}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -244,14 +338,6 @@ export function ReviewsSection() {
     finishDrag();
   };
 
-  const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-
   return (
     <section id="reviews" className="py-16 md:py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -295,41 +381,7 @@ export function ReviewsSection() {
                 onTouchEnd={handleTouchEnd}
               >
                 {displayReviews.map((review, index) => (
-                  <div
-                    key={review.customerName + index}
-                    className="min-w-[300px] sm:min-w-[350px] md:w-1/2 lg:w-1/3 flex-shrink-0 px-2 select-none"
-                  >
-                    <Card className="border-border/60 hover:border-primary/20 hover:shadow-md transition-all duration-300 h-full">
-                      <CardContent className="p-6">
-                        <Quote className="w-8 h-8 text-primary/20 mb-3" />
-                        <StarRating rating={review.rating} />
-                        <p className="mt-3 text-muted-foreground leading-relaxed">
-                          {review.text}
-                        </p>
-                        <div className="mt-4 flex items-center gap-3 border-t border-border pt-4">
-                          <Avatar className="w-9 h-9">
-                            {review.photos && review.photos.length > 0 && (
-                              <AvatarImage src={review.photos[0]} alt={review.customerName} />
-                            )}
-                            <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                              {getInitials(review.customerName)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <span className="font-semibold text-foreground text-sm">
-                              {review.customerName}
-                            </span>
-                            {review.photos && review.photos.length > 0 && (
-                              <span className="text-xs text-muted-foreground ml-2">
-                                +{review.photos.length} photo
-                                {review.photos.length > 1 ? "s" : ""}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                  <ReviewCard key={review.customerName + index} review={review} />
                 ))}
               </div>
             </div>
