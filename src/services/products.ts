@@ -28,7 +28,7 @@ function toSnakeProduct(data: Partial<Product>): Record<string, unknown> {
   if (data.code !== undefined) result.code = data.code;
   if (data.description !== undefined) result.description = data.description;
   if (data.price !== undefined) result.price = data.price;
-  if (data.discountPrice !== undefined) result.discount_price = data.discountPrice;
+  if ("discountPrice" in data) result.discount_price = data.discountPrice ?? null;
   if (data.images !== undefined) result.images = data.images;
   if (data.gallery !== undefined) result.gallery = data.gallery;
   if (data.features !== undefined) result.features = data.features;
