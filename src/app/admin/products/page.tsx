@@ -42,7 +42,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice } from "@/lib/utils";
-import { Plus, Pencil, Trash2, Upload, X, Loader2, AlertCircle, ImageIcon, ZoomIn } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, Loader2, AlertCircle, ImageIcon, ZoomIn, RefreshCw } from "lucide-react";
 
 export default function ProductsPage() {
   const { products, loading, error, refresh } = useProducts();
@@ -56,9 +56,13 @@ export default function ProductsPage() {
   const [gallery, setGallery] = useState<string[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
-  const [zoomImage, setZoomImage] = useState<string | null>(null);
+  const [replacingImageIndex, setReplacingImageIndex] = useState<number | null>(null);
+  const [replacingGalleryIndex, setReplacingGalleryIndex] = useState<number | null>(null);
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const replaceImageInputRef = useRef<HTMLInputElement>(null);
+  const replaceGalleryInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -178,6 +182,48 @@ export default function ProductsPage() {
     form.setValue("gallery", updated, { shouldValidate: true });
   };
 
+  const handleReplaceImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || replacingImageIndex === null) return;
+    setUploadingImage(true);
+    try {
+      const path = `products/${Date.now()}-${file.name}`;
+      const url = await uploadImage(file, path);
+      const updated = [...images];
+      updated[replacingImageIndex] = url;
+      setImages(updated);
+      form.setValue("images", updated, { shouldValidate: true });
+      toast.success("Image replaced");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Replace failed");
+    } finally {
+      setUploadingImage(false);
+      setReplacingImageIndex(null);
+      if (replaceImageInputRef.current) replaceImageInputRef.current.value = "";
+    }
+  };
+
+  const handleReplaceGallery = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || replacingGalleryIndex === null) return;
+    setUploadingGallery(true);
+    try {
+      const path = `products/gallery/${Date.now()}-${file.name}`;
+      const url = await uploadImage(file, path);
+      const updated = [...gallery];
+      updated[replacingGalleryIndex] = url;
+      setGallery(updated);
+      form.setValue("gallery", updated, { shouldValidate: true });
+      toast.success("Gallery image replaced");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Replace failed");
+    } finally {
+      setUploadingGallery(false);
+      setReplacingGalleryIndex(null);
+      if (replaceGalleryInputRef.current) replaceGalleryInputRef.current.value = "";
+    }
+  };
+
   const onSubmit = async (data: ProductFormData) => {
     setSubmitting(true);
     try {
@@ -288,7 +334,7 @@ export default function ProductsPage() {
                             src={product.images[0]}
                             alt={product.name}
                             className="h-10 w-10 rounded object-cover cursor-pointer hover:ring-2 ring-primary transition-all"
-                            onClick={() => setZoomImage(product.images[0])}
+                            onClick={() => setZoomedImage(product.images[0])}
                           />
                         ) : (
                           <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
@@ -416,7 +462,7 @@ export default function ProductsPage() {
                         src={url}
                         alt={`Product ${i + 1}`}
                         className="h-20 w-20 rounded border object-cover cursor-pointer hover:ring-2 ring-primary transition-all"
-                        onClick={() => setZoomImage(url)}
+                        onClick={() => setZoomedImage(url)}
                       />
                       <button
                         type="button"
@@ -424,6 +470,17 @@ export default function ProductsPage() {
                         className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReplacingImageIndex(i);
+                          replaceImageInputRef.current?.click();
+                        }}
+                        disabled={uploadingImage}
+                        className="absolute -bottom-1.5 -right-1.5 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <RefreshCw className="h-3 w-3" />
                       </button>
                     </div>
                   ))}
@@ -435,6 +492,14 @@ export default function ProductsPage() {
                 accept="image/*"
                 multiple
                 onChange={handleImageUpload}
+                disabled={uploadingImage}
+                className="hidden"
+              />
+              <input
+                ref={replaceImageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleReplaceImage}
                 disabled={uploadingImage}
                 className="hidden"
               />
@@ -467,7 +532,7 @@ export default function ProductsPage() {
                         src={url}
                         alt={`Gallery ${i + 1}`}
                         className="h-20 w-20 rounded border object-cover cursor-pointer hover:ring-2 ring-primary transition-all"
-                        onClick={() => setZoomImage(url)}
+                        onClick={() => setZoomedImage(url)}
                       />
                       <button
                         type="button"
@@ -475,6 +540,17 @@ export default function ProductsPage() {
                         className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReplacingGalleryIndex(i);
+                          replaceGalleryInputRef.current?.click();
+                        }}
+                        disabled={uploadingGallery}
+                        className="absolute -bottom-1.5 -right-1.5 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <RefreshCw className="h-3 w-3" />
                       </button>
                     </div>
                   ))}
@@ -486,6 +562,14 @@ export default function ProductsPage() {
                 accept="image/*"
                 multiple
                 onChange={handleGalleryUpload}
+                disabled={uploadingGallery}
+                className="hidden"
+              />
+              <input
+                ref={replaceGalleryInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleReplaceGallery}
                 disabled={uploadingGallery}
                 className="hidden"
               />
@@ -575,18 +659,18 @@ export default function ProductsPage() {
       </Dialog>
 
       {/* Image Zoom Dialog */}
-      <Dialog open={!!zoomImage} onOpenChange={() => setZoomImage(null)}>
+      <Dialog open={!!zoomedImage} onOpenChange={() => setZoomedImage(null)}>
         <DialogContent className="max-w-4xl p-1 bg-black/90 border-0">
-          {zoomImage && (
+          {zoomedImage && (
             <div className="relative flex items-center justify-center">
               <button
-                onClick={() => setZoomImage(null)}
+                onClick={() => setZoomedImage(null)}
                 className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
               <img
-                src={zoomImage}
+                src={zoomedImage}
                 alt="Zoomed product"
                 className="max-h-[80vh] w-full object-contain rounded"
               />

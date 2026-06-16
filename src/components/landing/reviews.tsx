@@ -54,7 +54,7 @@ function ReviewsSkeleton() {
       {Array.from({ length: 3 }).map((_, i) => (
         <div
           key={i}
-          className="min-w-[300px] sm:min-w-[350px] md:w-1/2 lg:w-1/3 flex-shrink-0 px-2"
+          className="w-full min-w-0 md:w-1/2 lg:w-1/3 flex-shrink-0 px-2"
         >
           <Card>
             <CardContent className="p-6 space-y-4">
@@ -102,7 +102,7 @@ function ReviewCard({ review }: { review: typeof fallbackReviews[number] }) {
   };
 
   return (
-    <div className="min-w-[300px] sm:min-w-[350px] md:w-1/2 lg:w-1/3 flex-shrink-0 px-2 select-none">
+    <div className="w-full min-w-0 md:w-1/2 lg:w-1/3 flex-shrink-0 px-2 select-none">
       <Card className="border-border/60 hover:border-primary/20 hover:shadow-md transition-all duration-300 h-full">
         {/* Photos */}
         {photos.length > 0 && (
